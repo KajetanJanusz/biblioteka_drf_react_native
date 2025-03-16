@@ -1,42 +1,87 @@
-// src/api/apiServices.ts
 import { api } from '../services/authService';
 
-// User related API calls
+interface Credentials {
+  username: string;
+  password: string;
+}
+
+interface UserData {
+  username: string;
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  is_employee: boolean;
+  is_active: boolean;
+}
+
+interface BookData {
+  title: string;
+  author: string;
+  category: string;
+  isbn: string;
+  total_copies: number;
+  description: string;
+  published_date: string;
+}
+
+
+export const authApi = {
+  login: (credentials: Credentials) => 
+    api.post('token/', credentials),
+  refreshToken: (refreshToken: string) => 
+    api.post('token/refresh/', { refresh: refreshToken }),
+  register: (userData: UserData) => 
+    api.post('register/', userData),
+};
+
 export const userApi = {
   getUsers: () => api.get('users/'),
-  getUserDetails: (userId: string) => api.get(`users/details/?user_id=${userId}`),
-  addUser: (userData: any) => api.post('users/add', userData),
-  editUser: (userData: any) => api.put('users/edit', userData),
-  deleteUser: (userId: string) => api.delete(`users/delete?user_id=${userId}`),
-  activateUser: (userId: string) => api.put(`users/active?user_id=${userId}`),
+  getUserDetails: (userId: number) => 
+    api.get('users/details/', { params: { user_id: userId } }),
+  addUser: (userData: UserData) => 
+    api.post('users/add/', userData),
+  editUser: (userData: Omit<UserData, 'is_active' | 'is_employee'>) => 
+    api.put('users/edit/', userData),
+  deleteUser: (userId: string) => 
+    api.delete('users/delete/', { params: { user_id: userId } }),
+  activateUser: (userId: string) => 
+    api.put('users/active/', { user_id: userId }),
 };
 
-// Books related API calls
 export const bookApi = {
   getBooks: () => api.get('books/'),
-  getBookDetails: (bookId: string) => api.get(`books?book_id=${bookId}`),
-  addBook: (bookData: any) => api.post('books/add/', bookData),
-  editBook: (bookData: any) => api.put('books/edit/', bookData),
-  deleteBook: (bookId: string) => api.delete(`books/delete/?book_id=${bookId}`),
-  borrowBook: (borrowData: any) => api.post('books/borrow/', borrowData),
-  returnBook: (returnData: any) => api.post('books/return/', returnData),
-  extendRental: (extendData: any) => api.post('books/extend/', extendData),
-  approveReturn: (approveData: any) => api.post('books/approve-return/', approveData),
-  markAsRead: (notificationId: string) => api.put(`books/mark-as-read/?notification_id=${notificationId}`),
-  subscribeToBook: (subscribeData: any) => api.post('books/notification', subscribeData),
+  getBookDetails: (bookId: string) => 
+    api.get('books/details/', { params: { book_id: bookId } }),
+  addBook: (bookData: BookData) => 
+    api.post('books/add/', bookData),
+  editBook: (bookData: BookData) => 
+    api.put('books/edit/', bookData),
+  deleteBook: (bookId: number) => 
+    api.delete('books/delete/', { params: { id: bookId } }),
+  borrowBook: (bookId: number) => 
+    api.post('books/borrow/', { params: { id: bookId } }),
+  returnBook: (rentalId: number) => 
+    api.post('books/return/', { params: { id: rentalId } }),
+  extendRental: (rentalId: number) => 
+    api.post('books/extend/', { params: { id: rentalId } }),
+  approveReturn: (rentalId: number) => 
+    api.post('books/approve-return/', { params: { id: rentalId } }),
+  markAsRead: (notificationId: number) => 
+    api.post('books/mark-as-read/', { params: { id: notificationId } }),
+  subscribeToBook: (notificationId: number) => 
+    api.post('books/notification/', { params: { id: notificationId } }),
 };
 
-// Borrows related API calls
 export const borrowApi = {
   getBorrows: () => api.get('borrows/'),
 };
 
-// Articles related API calls
 export const articleApi = {
   getArticles: () => api.get('articles/'),
 };
 
-// Dashboard related API calls
 export const dashboardApi = {
   getCustomerDashboard: () => api.get('dashboard/customer/'),
   getEmployeeDashboard: () => api.get('dashboard/employee/'),
