@@ -32,8 +32,8 @@ export const authApi = {
     api.post('token/', credentials),
   refreshToken: (refreshToken: string) => 
     api.post('token/refresh/', { refresh: refreshToken }),
-  register: (userData: UserData) => 
-    api.post('register/', userData),
+  register: (username: string, password: string) => 
+    api.post('register/', {username: username, password: password}),
 };
 
 export const userApi = {
