@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,45 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  TouchableOpacity,
+  Animated,
+  Dimensions,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { dashboardApi } from '../services/apiServices.ts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const MENU_WIDTH = Dimensions.get('window').width * 0.7;
+
 const DashboardClientScreen = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuAnimation = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
+
+  const toggleMenu = () => {
+    const toValue = menuOpen ? 0 : 1;
+    
+    Animated.timing(menuAnimation, {
+      toValue,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+    
+    setMenuOpen(!menuOpen);
+  };
+  
+  const menuTranslate = menuAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-MENU_WIDTH, 0],
+  });
+  
+  const overlayOpacity = menuAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.5],
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -40,6 +70,11 @@ const DashboardClientScreen = () => {
 
     fetchDashboardData();
   }, [navigation]);
+
+  const navigateTo = (screen) => {
+    toggleMenu();
+    navigation.navigate(screen);
+  };
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0066CC" style={styles.loader} />;
@@ -72,126 +107,233 @@ const DashboardClientScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Welcome, {data.username}!</Text>
-      
-      <View style={styles.badgeContainer}>
-        <Text style={styles.sectionTitle}>🏆 Achievements:</Text>
-        <View style={styles.badgeList}>
-          {data.badges.first_book && <Text style={styles.badge}>First Book</Text>}
-          {data.badges.ten_books && <Text style={styles.badge}>10 Books</Text>}
-          {data.badges.twenty_books && <Text style={styles.badge}>20 Books</Text>}
-          {data.badges.hundred_books && <Text style={styles.badge}>100 Books</Text>}
-          {data.badges.three_categories && <Text style={styles.badge}>3 Categories</Text>}
-        </View>
+    <View style={styles.mainContainer}>
+      {/* Hamburger Menu Button */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
+          <View style={styles.menuIcon}>
+            <View style={styles.menuBar} />
+            <View style={styles.menuBar} />
+            <View style={styles.menuBar} />
+          </View>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Library Dashboard</Text>
       </View>
 
-      <Text style={styles.sectionTitle}>📚 Currently Borrowed Books:</Text>
-      {data.rented_books && data.rented_books.length > 0 ? (
-        data.rented_books.map((item) => (
-          <View key={item.id.toString()} style={styles.bookItem}>
-            <View style={styles.bookHeader}>
-              <Text style={styles.bookTitle}>{item.book_title}</Text>
-              <Text style={styles.bookStatus}>{item.is_extended ? "Extended" : getDaysRemaining(item.due_date)}</Text>
-            </View>
-            <Text style={styles.bookAuthor}>by {item.book_author}</Text>
-            <Text style={styles.bookDates}>
-              Borrowed: {formatDate(item.rental_date)} | Due: {formatDate(item.due_date)}
-            </Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.emptyList}>No books currently borrowed</Text>
+      {/* Overlay to close menu when tapped */}
+      {menuOpen && (
+        <TouchableOpacity
+          style={[styles.overlay, { opacity: overlayOpacity }]}
+          activeOpacity={1}
+          onPress={toggleMenu}
+        />
       )}
 
-      <Text style={styles.sectionTitle}>📘 Reading History:</Text>
-      {data.rented_books_old && data.rented_books_old.length > 0 ? (
-        data.rented_books_old.map((item) => (
-          <View key={item.id.toString()} style={styles.historyItem}>
-            <Text style={styles.historyTitle}>{item.book_title}</Text>
-            <Text style={styles.historyAuthor}>by {item.book_author}</Text>
-            <Text style={styles.historyDate}>Returned: {formatDate(item.return_date)}</Text>
+      {/* Slide-out Menu */}
+      <Animated.View style={[styles.menu, { transform: [{ translateX: menuTranslate }] }]}>
+        <View style={styles.menuHeader}>
+          <Text style={styles.menuTitle}>Menu</Text>
+        </View>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ListBooks')}>
+          <Text style={styles.menuItemText}>Books</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* Main Content */}
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Welcome, {data.username}!</Text>
+        
+        <View style={styles.badgeContainer}>
+          <Text style={styles.sectionTitle}>🏆 Achievements:</Text>
+          <View style={styles.badgeList}>
+            {data.badges.first_book && <Text style={styles.badge}>First Book</Text>}
+            {data.badges.ten_books && <Text style={styles.badge}>10 Books</Text>}
+            {data.badges.twenty_books && <Text style={styles.badge}>20 Books</Text>}
+            {data.badges.hundred_books && <Text style={styles.badge}>100 Books</Text>}
+            {data.badges.three_categories && <Text style={styles.badge}>3 Categories</Text>}
           </View>
-        ))
-      ) : (
-        <Text style={styles.emptyList}>No reading history</Text>
-      )}
-
-      <Text style={styles.sectionTitle}>📊 Reading Stats:</Text>
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{data.all_my_rents}</Text>
-          <Text style={styles.statLabel}>Total Books Read</Text>
         </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{data.average_user_rents.toFixed(1)}</Text>
-          <Text style={styles.statLabel}>Avg. User Reads</Text>
-        </View>
-      </View>
 
-      <Text style={styles.sectionTitle}>📚 My Reading Categories:</Text>
-      <ScrollView horizontal style={styles.categoryList}>
-        {data.books_in_categories && data.books_in_categories.length > 0 ? (
-          data.books_in_categories.map((item) => (
-            <View key={item.book_copy__book__category__name} style={styles.categoryItem}>
-              <Text style={styles.categoryName}>{item.book_copy__book__category__name}</Text>
-              <Text style={styles.categoryCount}>{item.count} books</Text>
+        <Text style={styles.sectionTitle}>📚 Currently Borrowed Books:</Text>
+        {data.rented_books && data.rented_books.length > 0 ? (
+          data.rented_books.map((item) => (
+            <View key={item.id.toString()} style={styles.bookItem}>
+              <View style={styles.bookHeader}>
+                <Text style={styles.bookTitle}>{item.book_title}</Text>
+                <Text style={styles.bookStatus}>{item.is_extended ? "Extended" : getDaysRemaining(item.due_date)}</Text>
+              </View>
+              <Text style={styles.bookAuthor}>by {item.book_author}</Text>
+              <Text style={styles.bookDates}>
+                Borrowed: {formatDate(item.rental_date)} | Due: {formatDate(item.due_date)}
+              </Text>
             </View>
           ))
         ) : (
-          <Text style={styles.emptyList}>No categories</Text>
+          <Text style={styles.emptyList}>No books currently borrowed</Text>
+        )}
+
+        <Text style={styles.sectionTitle}>📘 Reading History:</Text>
+        {data.rented_books_old && data.rented_books_old.length > 0 ? (
+          data.rented_books_old.map((item) => (
+            <View key={item.id.toString()} style={styles.historyItem}>
+              <Text style={styles.historyTitle}>{item.book_title}</Text>
+              <Text style={styles.historyAuthor}>by {item.book_author}</Text>
+              <Text style={styles.historyDate}>Returned: {formatDate(item.return_date)}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyList}>No reading history</Text>
+        )}
+
+        <Text style={styles.sectionTitle}>📊 Reading Stats:</Text>
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{data.all_my_rents}</Text>
+            <Text style={styles.statLabel}>Total Books Read</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{data.average_user_rents.toFixed(1)}</Text>
+            <Text style={styles.statLabel}>Avg. User Reads</Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>📚 My Reading Categories:</Text>
+        <ScrollView horizontal style={styles.categoryList}>
+          {data.books_in_categories && data.books_in_categories.length > 0 ? (
+            data.books_in_categories.map((item) => (
+              <View key={item.book_copy__book__category__name} style={styles.categoryItem}>
+                <Text style={styles.categoryName}>{item.book_copy__book__category__name}</Text>
+                <Text style={styles.categoryCount}>{item.count} books</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.emptyList}>No categories</Text>
+          )}
+        </ScrollView>
+
+        <Text style={styles.sectionTitle}>🔔 Notifications:</Text>
+        {data.notifications && data.notifications.length > 0 ? (
+          data.notifications.map((item) => (
+            <View key={item.id.toString()} style={styles.notificationItem}>
+              <Text style={styles.notificationText}>{item.message}</Text>
+              <Text style={styles.notificationDate}>{formatDate(item.created_at.split('T')[0])}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyList}>No notifications</Text>
+        )}
+
+        <Text style={styles.sectionTitle}>📚 Recommended for You:</Text>
+        {data.ai_recommendations && data.ai_recommendations.length > 0 ? (
+          data.ai_recommendations.map((item, index) => (
+            <View key={index.toString()} style={styles.recommendationItem}>
+              <Text style={styles.recommendationText}>{item}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyList}>No recommendations</Text>
+        )}
+
+        <Text style={styles.sectionTitle}>⭐ My Book Reviews:</Text>
+        {data.opinions && data.opinions.length > 0 ? (
+          data.opinions.map((item) => (
+            <View key={item.id.toString()} style={styles.reviewItem}>
+              <View style={styles.reviewHeader}>
+                <Text style={styles.reviewTitle}>{item.book_title}</Text>
+                <Text style={styles.reviewRating}>
+                  {Array(item.rate).fill('⭐').join('')}
+                </Text>
+              </View>
+              <Text style={styles.reviewComment}>"{item.comment}"</Text>
+              <Text style={styles.reviewDate}>{formatDate(item.created_at)}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyList}>No reviews yet</Text>
         )}
       </ScrollView>
-
-      <Text style={styles.sectionTitle}>🔔 Notifications:</Text>
-      {data.notifications && data.notifications.length > 0 ? (
-        data.notifications.map((item) => (
-          <View key={item.id.toString()} style={styles.notificationItem}>
-            <Text style={styles.notificationText}>{item.message}</Text>
-            <Text style={styles.notificationDate}>{formatDate(item.created_at.split('T')[0])}</Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.emptyList}>No notifications</Text>
-      )}
-
-      <Text style={styles.sectionTitle}>📚 Recommended for You:</Text>
-      {data.ai_recommendations && data.ai_recommendations.length > 0 ? (
-        data.ai_recommendations.map((item, index) => (
-          <View key={index.toString()} style={styles.recommendationItem}>
-            <Text style={styles.recommendationText}>{item}</Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.emptyList}>No recommendations</Text>
-      )}
-
-      <Text style={styles.sectionTitle}>⭐ My Book Reviews:</Text>
-      {data.opinions && data.opinions.length > 0 ? (
-        data.opinions.map((item) => (
-          <View key={item.id.toString()} style={styles.reviewItem}>
-            <View style={styles.reviewHeader}>
-              <Text style={styles.reviewTitle}>{item.book_title}</Text>
-              <Text style={styles.reviewRating}>
-                {Array(item.rate).fill('⭐').join('')}
-              </Text>
-            </View>
-            <Text style={styles.reviewComment}>"{item.comment}"</Text>
-            <Text style={styles.reviewDate}>{formatDate(item.created_at)}</Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.emptyList}>No reviews yet</Text>
-      )}
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1e88e5',
+    paddingTop: Platform.OS === 'ios' ? 44 : 16,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginLeft: 16,
+  },
+  menuButton: {
+    padding: 8,
+  },
+  menuIcon: {
+    width: 24,
+    height: 24,
+    justifyContent: 'space-around',
+  },
+  menuBar: {
+    height: 3,
+    width: 24,
+    backgroundColor: '#fff',
+    borderRadius: 1,
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#000',
+    zIndex: 1,
+  },
+  menu: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: MENU_WIDTH,
+    height: '100%',
+    backgroundColor: '#fff',
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  menuHeader: {
+    padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 44 : 20,
+    backgroundColor: '#1e88e5',
+  },
+  menuTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  menuItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   loader: {
     flex: 1,
