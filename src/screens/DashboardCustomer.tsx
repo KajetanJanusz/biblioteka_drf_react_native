@@ -59,10 +59,8 @@ const DashboardClientScreen = () => {
         const response = await dashboardApi.getCustomerDashboard();
         setData(response.data);
       } catch (error) {
-        Alert.alert(
-          'Error',
-          error.response?.data?.detail || 'Failed to fetch dashboard data'
-        );
+        navigation.navigate('DashboardEmployee');
+        return;
       } finally {
         setLoading(false);
       }
@@ -290,12 +288,8 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
   overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#000',
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     zIndex: 1,
   },
   menu: {
@@ -342,8 +336,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     textAlign: 'center',
     padding: 20,
     color: '#f44336',
@@ -361,136 +353,40 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#333',
   },
-  list: {
-    marginBottom: 8,
-  },
   emptyList: {
     fontStyle: 'italic',
     color: '#666',
     textAlign: 'center',
     padding: 8,
   },
-  // Book item styles
-  bookItem: {
+  itemContainer: {
     backgroundColor: '#fff',
     padding: 12,
     marginBottom: 8,
     borderRadius: 8,
     borderLeftWidth: 4,
+  },
+  bookItem: {
     borderLeftColor: '#1e88e5',
   },
-  bookHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  bookTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  bookStatus: {
-    fontSize: 12,
-    color: '#fff',
-    backgroundColor: '#1e88e5',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  bookAuthor: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  bookDates: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 8,
-  },
-  // History item styles
-  historyItem: {
-    backgroundColor: '#fff',
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#9e9e9e',
-  },
-  historyTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  historyAuthor: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  historyDate: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 8,
-  },
-  // Notification styles
-  notificationItem: {
-    backgroundColor: '#fff',
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#ff9800',
-  },
-  notificationText: {
-    fontSize: 14,
-  },
-  notificationDate: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  // Recommendation styles
-  recommendationItem: {
-    backgroundColor: '#fff',
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    borderLeftWidth: 4,
+  customerItem: {
     borderLeftColor: '#4caf50',
   },
-  recommendationText: {
-    fontSize: 14,
+  popularBookItem: {
+    borderLeftColor: '#ff9800',
   },
-  // Review styles
-  reviewItem: {
-    backgroundColor: '#fff',
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#f44336',
+  returnItem: {
+    borderLeftColor: '#9c27b0',
   },
-  reviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  reviewTitle: {
+  itemTitle: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  reviewRating: {
+  itemSubtitle: {
     fontSize: 14,
-  },
-  reviewComment: {
-    fontSize: 14,
-    fontStyle: 'italic',
+    color: '#666',
     marginTop: 4,
   },
-  reviewDate: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 8,
-  },
-  // Stats styles
   statsContainer: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -512,45 +408,7 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
-  // Badge styles
-  badgeContainer: {
-    marginBottom: 16,
-  },
-  badgeList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  badge: {
-    backgroundColor: '#9c27b0',
-    color: '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
-    marginRight: 8,
-    marginBottom: 8,
-    fontSize: 12,
-  },
-  // Category styles
-  categoryList: {
-    marginBottom: 16,
-  },
-  categoryItem: {
-    backgroundColor: '#fff',
-    padding: 12,
-    marginRight: 8,
-    borderRadius: 8,
-    minWidth: 120,
-    alignItems: 'center',
-  },
-  categoryName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  categoryCount: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
 });
+
 
 export default DashboardClientScreen;
