@@ -132,8 +132,14 @@ const DashboardClientScreen = () => {
         <View style={styles.menuHeader}>
           <Text style={styles.menuTitle}>Menu</Text>
         </View>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('DashboardCustomer')}>
+          <Text style={styles.menuItemText}>Dashboard</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ListBooks')}>
           <Text style={styles.menuItemText}>Books</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Logout')}>
+          <Text style={styles.menuItemText}>Logout</Text>
         </TouchableOpacity>
       </Animated.View>
 

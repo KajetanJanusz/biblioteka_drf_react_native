@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { login } from '../services/authService';
 import { useNavigation } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
@@ -41,6 +42,8 @@ const LoginScreen = () => {
       setIsLoading(false);
     }
   };
+  const route = useRoute();
+const message = route.params?.message;
 
   const navigateToRegister = () => {
     navigation.navigate('Register');
@@ -48,6 +51,7 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
+      {message && <Text style={styles.successMessage}>{message}</Text>}
       <Text style={styles.title}>Library App</Text>
       <Text style={styles.subtitle}>Login to your account</Text>
 
@@ -58,6 +62,7 @@ const LoginScreen = () => {
           value={username}
           onChangeText={setUsername}
           placeholder="Enter your username"
+          placeholderTextColor="#666"
           autoCapitalize="none"
         />
       </View>
@@ -69,6 +74,7 @@ const LoginScreen = () => {
           value={password}
           onChangeText={setPassword}
           placeholder="Enter your password"
+          placeholderTextColor="#666"
           secureTextEntry
         />
       </View>
@@ -149,6 +155,12 @@ const styles = StyleSheet.create({
   registerText: {
     color: '#0066CC',
     fontWeight: 'bold',
+  },
+  successMessage: {
+    color: 'green',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 

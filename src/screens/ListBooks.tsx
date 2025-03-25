@@ -146,15 +146,15 @@ const BookListScreen = () => {
               <View style={styles.menuHeader}>
                 <Text style={styles.menuTitle}>Menu</Text>
               </View>
-              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Dashboard')}>
-                <Text style={styles.menuItemText}>Dashboard</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Login')}>
-                <Text style={styles.menuItemText}>Login</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Register')}>
-                <Text style={styles.menuItemText}>Register</Text>
-              </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('DashboardCustomer')}>
+          <Text style={styles.menuItemText}>Dashboard</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ListBooks')}>
+          <Text style={styles.menuItemText}>Books</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Logout')}>
+          <Text style={styles.menuItemText}>Logout</Text>
+        </TouchableOpacity>
             </View>
           </View>
         )}
@@ -282,6 +282,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
   },
   menuHeader: {
     padding: 20,

@@ -115,12 +115,18 @@ const DashboardEmployee = () => {
         <View style={styles.menuHeader}>
           <Text style={styles.menuTitle}>Menu</Text>
         </View>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ManageBooks')}>
-          <Text style={styles.menuItemText}>Manage Books</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ManageUsers')}>
-          <Text style={styles.menuItemText}>Manage Users</Text>
-        </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('DashboardEmployee')}>
+                <Text style={styles.menuItemText}>Dashboard</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ManageBooks')}>
+                <Text style={styles.menuItemText}>Manage Books</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ManageUsers')}>
+                <Text style={styles.menuItemText}>Manage Users</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Logout')}>
+                <Text style={styles.menuItemText}>Logout</Text>
+              </TouchableOpacity>
       </Animated.View>
 
       {/* Main Content */}
