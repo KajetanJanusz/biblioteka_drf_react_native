@@ -53,7 +53,7 @@ const ManageUsersScreen = () => {
     <TouchableOpacity
       style={styles.userItem}
       onPress={() => {
-        navigation.navigate('DetailsUsers', { id: item.id });
+        navigation.navigate('DetailsUsers', { user_id: item.id });
       }}
     >
       <View style={styles.userHeader}>
@@ -109,6 +109,12 @@ const ManageUsersScreen = () => {
             </View>
           </View>
         )}
+          {/* Header with Add User Button */}
+          <View style={styles.header}>
+          <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddUser')}>
+            <Text style={styles.addButtonText}>+ Add User</Text>
+          </TouchableOpacity>
+        </View>
 
         {loading ? (
           <ActivityIndicator size="large" color="#0066CC" style={styles.loader} />
@@ -148,6 +154,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginLeft: 16,
+  },
+  addButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1e88e5',
   },
   userList: {
     padding: 16,

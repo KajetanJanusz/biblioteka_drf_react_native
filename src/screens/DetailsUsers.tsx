@@ -28,10 +28,10 @@ const DetailUsersScreen = () => {
 
   const route = useRoute();
   const navigation = useNavigation();
-  const userId = route.params?.id;
+  const userId = route.params?.user_id;
 
   useEffect(() => {
-    if (userId) fetchUserDetails();
+    fetchUserDetails();
   }, [userId]);
 
   const fetchUserDetails = async () => {

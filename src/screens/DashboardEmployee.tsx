@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: '#1e88e5',
-      paddingTop: Platform.OS === 'ios' ? 44 : 16,
+      paddingTop: Platform.OS === 'ios' ? 0 : 16,
       paddingBottom: 16,
       paddingHorizontal: 16,
     },

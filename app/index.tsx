@@ -7,9 +7,11 @@ import LogoutScreen from '../src/screens/LogoutScreen';
 import DashboardCustomer from '../src/screens/DashboardCustomer';
 import DashboardEmployee from '../src/screens/DashboardEmployee';
 import ManageUsers from '../src/screens/ManageUsers';
+import AddUser from '../src/screens/AddUser';
 import DetailsUsers from '../src/screens/DetailsUsers';
 import ListBooks from '../src/screens/ListBooks';
 import DetailsBook from '../src/screens/DetailsBook';
+//import ManageBooks from '../src/screens/ManageBooks';
 
 const Stack = createStackNavigator();
 
@@ -22,9 +24,11 @@ export default function App() {
       <Stack.Screen name="DashboardCustomer" component={DashboardCustomer} options={{ headerShown: false }} />
       <Stack.Screen name="DashboardEmployee" component={DashboardEmployee} options={{ headerShown: false }} />
       <Stack.Screen name="ManageUsers" component={ManageUsers} options={{ headerShown: false }} />
+      <Stack.Screen name="AddUser" component={AddUser} options={{ headerShown: false }} />
       <Stack.Screen name="DetailsUsers" component={DetailsUsers} options={{ headerShown: false }} />
       <Stack.Screen name="ListBooks" component={ListBooks} options={{ headerShown: false }} />
       <Stack.Screen name="DetailsBook" component={DetailsBook} options={{ headerShown: false }} />
+      {/* <Stack.Screen name="ManageBooks" component={ManageBooks} options={{ headerShown: false }} /> */}
     </Stack.Navigator>
   );
 }
