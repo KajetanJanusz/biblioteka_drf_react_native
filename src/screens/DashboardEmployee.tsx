@@ -101,7 +101,6 @@ const DashboardEmployee = () => {
         <Text style={styles.headerTitle}>Employee Dashboard</Text>
       </View>
 
-      {/* Overlay to close menu when tapped */}
       {menuOpen && (
         <TouchableOpacity
           style={[styles.overlay, { opacity: overlayOpacity }]}
