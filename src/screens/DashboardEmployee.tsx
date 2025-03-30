@@ -180,10 +180,16 @@ const DashboardEmployee = () => {
         <Text style={styles.sectionTitle}>🔄 Returns to Approve:</Text>
         {data.returns_to_approve && data.returns_to_approve.length > 0 ? (
           data.returns_to_approve.map((item) => (
-            <View key={item.id.toString()} style={styles.returnItem}>
-              <Text style={styles.returnTitle}>{item.book_copy__book__title}</Text>
-              <Text style={styles.returnUser}>Returned by: {item.user__username}</Text>
-            </View>
+            <TouchableOpacity 
+            key={item.id ? item.id.toString() : `rented-${index}`} 
+            style={styles.bookItem}
+            onPress={() => { console.log(item); navigation.navigate('ReturnApprove', { rentalId: item.id })}}
+            >
+              <View key={item.id.toString()} style={styles.returnItem}>
+                <Text style={styles.returnTitle}>{item.book_copy__book__title}</Text>
+                <Text style={styles.returnUser}>Returned by: {item.user__username}</Text>
+              </View>
+            </TouchableOpacity>
           ))
         ) : (
           <Text style={styles.emptyList}>No returns to approve</Text>

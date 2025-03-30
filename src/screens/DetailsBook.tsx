@@ -71,6 +71,33 @@ const BookDetailsScreen = () => {
     }
   };
 
+  // Dodaj nową funkcję do wypożyczania książki
+const borrowBook = async () => {
+  try {
+    // Pokaż wskaźnik ładowania
+    setLoading(true);
+    
+    // Wywołaj odpowiednią metodę z API
+    await bookApi.borrowBook(bookId);
+    
+    // Pokaż powiadomienie o sukcesie
+    Alert.alert('Success', `You've borrowed "${book.title}"`);
+    
+    // Odśwież dane książki, aby pokazać zaktualizowaną liczbę dostępnych egzemplarzy
+    fetchBookDetails();
+    
+  } catch (error) {
+    // Obsłuż błędy
+    Alert.alert(
+      'Error',
+      error.response?.data?.detail || 'Failed to borrow the book'
+    );
+  } finally {
+    // Zakończ ładowanie
+    setLoading(false);
+  }
+};
+
   // Function to render the star rating
   const renderStarRating = (rating) => {
     const stars = [];
@@ -215,7 +242,7 @@ const BookDetailsScreen = () => {
                 available_copies === 0 && styles.disabledButton
               ]}
               disabled={available_copies === 0}
-              onPress={() => Alert.alert('Success', `You've borrowed "${book.title}"`)}
+              onPress={borrowBook} // Zmiana tutaj - używamy nowej funkcji
             >
               <Text style={styles.borrowButtonText}>
                 {available_copies > 0 ? 'Borrow Book' : 'Currently Unavailable'}
@@ -231,7 +258,7 @@ const BookDetailsScreen = () => {
               <FlatList
                 data={opinions}
                 renderItem={renderOpinionItem}
-                keyExtractor={(item) => `opinion-${item.id}`}
+                keyExtractor={(item, index) => `opinion-${item.id || index}`}
                 scrollEnabled={false}
               />
             ) : (

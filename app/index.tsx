@@ -11,7 +11,9 @@ import AddUser from '../src/screens/AddUser';
 import DetailsUsers from '../src/screens/DetailsUsers';
 import ListBooks from '../src/screens/ListBooks';
 import DetailsBook from '../src/screens/DetailsBook';
-//import ManageBooks from '../src/screens/ManageBooks';
+import ManageBooks from '../src/screens/ManageBooks';
+import ReturnBook from '../src/screens/ReturnBook';
+import ReturnApprove from '../src/screens/ReturnApprove';
 
 const Stack = createStackNavigator();
 
@@ -28,7 +30,9 @@ export default function App() {
       <Stack.Screen name="DetailsUsers" component={DetailsUsers} options={{ headerShown: false }} />
       <Stack.Screen name="ListBooks" component={ListBooks} options={{ headerShown: false }} />
       <Stack.Screen name="DetailsBook" component={DetailsBook} options={{ headerShown: false }} />
-      {/* <Stack.Screen name="ManageBooks" component={ManageBooks} options={{ headerShown: false }} /> */}
+      <Stack.Screen name="ManageBooks" component={ManageBooks} options={{ headerShown: false }} />
+      <Stack.Screen name="ReturnBook" component={ReturnBook} options={{ headerShown: false }} />
+      <Stack.Screen name="ReturnApprove" component={ReturnApprove} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

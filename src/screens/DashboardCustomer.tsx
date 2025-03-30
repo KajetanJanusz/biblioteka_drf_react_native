@@ -150,18 +150,23 @@ const DashboardClientScreen = () => {
         <View style={styles.badgeContainer}>
           <Text style={styles.sectionTitle}>🏆 Achievements:</Text>
           <View style={styles.badgeList}>
-            {data.badges.first_book && <Text style={styles.badge}>First Book</Text>}
-            {data.badges.ten_books && <Text style={styles.badge}>10 Books</Text>}
-            {data.badges.twenty_books && <Text style={styles.badge}>20 Books</Text>}
-            {data.badges.hundred_books && <Text style={styles.badge}>100 Books</Text>}
-            {data.badges.three_categories && <Text style={styles.badge}>3 Categories</Text>}
+            {data.badges?.first_book && <Text style={styles.badge}>First Book</Text>}
+            {data.badges?.ten_books && <Text style={styles.badge}>10 Books</Text>}
+            {data.badges?.twenty_books && <Text style={styles.badge}>20 Books</Text>}
+            {data.badges?.hundred_books && <Text style={styles.badge}>100 Books</Text>}
+            {data.badges?.three_categories && <Text style={styles.badge}>3 Categories</Text>}
           </View>
         </View>
 
         <Text style={styles.sectionTitle}>📚 Currently Borrowed Books:</Text>
         {data.rented_books && data.rented_books.length > 0 ? (
-          data.rented_books.map((item) => (
-            <View key={item.id.toString()} style={styles.bookItem}>
+          data.rented_books.map((item, index) => (
+            <TouchableOpacity 
+            key={item.id ? item.id.toString() : `rented-${index}`} 
+            style={styles.bookItem}
+            onPress={() => { console.log(item); navigation.navigate('ReturnBook', { rentalId: item.rentalId, notificationId: item.notificationId })}}
+            >
+            <View >
               <View style={styles.bookHeader}>
                 <Text style={styles.bookTitle}>{item.book_title}</Text>
                 <Text style={styles.bookStatus}>{item.is_extended ? "Extended" : getDaysRemaining(item.due_date)}</Text>
@@ -171,6 +176,7 @@ const DashboardClientScreen = () => {
                 Borrowed: {formatDate(item.rental_date)} | Due: {formatDate(item.due_date)}
               </Text>
             </View>
+            </TouchableOpacity>
           ))
         ) : (
           <Text style={styles.emptyList}>No books currently borrowed</Text>
@@ -178,8 +184,8 @@ const DashboardClientScreen = () => {
 
         <Text style={styles.sectionTitle}>📘 Reading History:</Text>
         {data.rented_books_old && data.rented_books_old.length > 0 ? (
-          data.rented_books_old.map((item) => (
-            <View key={item.id.toString()} style={styles.historyItem}>
+          data.rented_books_old.map((item, index) => (
+            <View key={item.id ? item.id.toString() : `history-${index}`} style={styles.historyItem}>
               <Text style={styles.historyTitle}>{item.book_title}</Text>
               <Text style={styles.historyAuthor}>by {item.book_author}</Text>
               <Text style={styles.historyDate}>Returned: {formatDate(item.return_date)}</Text>
@@ -192,11 +198,11 @@ const DashboardClientScreen = () => {
         <Text style={styles.sectionTitle}>📊 Reading Stats:</Text>
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{data.all_my_rents}</Text>
+            <Text style={styles.statValue}>{data.all_my_rents || 0}</Text>
             <Text style={styles.statLabel}>Total Books Read</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{data.average_user_rents.toFixed(1)}</Text>
+            <Text style={styles.statValue}>{(data.average_user_rents || 0).toFixed(1)}</Text>
             <Text style={styles.statLabel}>Avg. User Reads</Text>
           </View>
         </View>
@@ -204,8 +210,8 @@ const DashboardClientScreen = () => {
         <Text style={styles.sectionTitle}>📚 My Reading Categories:</Text>
         <ScrollView horizontal style={styles.categoryList}>
           {data.books_in_categories && data.books_in_categories.length > 0 ? (
-            data.books_in_categories.map((item) => (
-              <View key={item.book_copy__book__category__name} style={styles.categoryItem}>
+            data.books_in_categories.map((item, index) => (
+              <View key={`category-${index}`} style={styles.categoryItem}>
                 <Text style={styles.categoryName}>{item.book_copy__book__category__name}</Text>
                 <Text style={styles.categoryCount}>{item.count} books</Text>
               </View>
@@ -217,10 +223,10 @@ const DashboardClientScreen = () => {
 
         <Text style={styles.sectionTitle}>🔔 Notifications:</Text>
         {data.notifications && data.notifications.length > 0 ? (
-          data.notifications.map((item) => (
-            <View key={item.id.toString()} style={styles.notificationItem}>
+          data.notifications.map((item, index) => (
+            <View key={item.id ? item.id.toString() : `notification-${index}`} style={styles.notificationItem}>
               <Text style={styles.notificationText}>{item.message}</Text>
-              <Text style={styles.notificationDate}>{formatDate(item.created_at.split('T')[0])}</Text>
+              <Text style={styles.notificationDate}>{formatDate(item.created_at?.split('T')[0])}</Text>
             </View>
           ))
         ) : (
@@ -230,7 +236,7 @@ const DashboardClientScreen = () => {
         <Text style={styles.sectionTitle}>📚 Recommended for You:</Text>
         {data.ai_recommendations && data.ai_recommendations.length > 0 ? (
           data.ai_recommendations.map((item, index) => (
-            <View key={index.toString()} style={styles.recommendationItem}>
+            <View key={`recommendation-${index}`} style={styles.recommendationItem}>
               <Text style={styles.recommendationText}>{item}</Text>
             </View>
           ))
@@ -240,8 +246,8 @@ const DashboardClientScreen = () => {
 
         <Text style={styles.sectionTitle}>⭐ My Book Reviews:</Text>
         {data.opinions && data.opinions.length > 0 ? (
-          data.opinions.map((item) => (
-            <View key={item.id.toString()} style={styles.reviewItem}>
+          data.opinions.map((item, index) => (
+            <View key={item.id ? item.id.toString() : `review-${index}`} style={styles.reviewItem}>
               <View style={styles.reviewHeader}>
                 <Text style={styles.reviewTitle}>{item.book_title}</Text>
                 <Text style={styles.reviewRating}>
@@ -359,39 +365,85 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: '#333',
   },
+  badgeContainer: {
+    marginBottom: 16,
+  },
+  badgeList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+  },
+  badge: {
+    backgroundColor: '#1e88e5',
+    color: '#fff',
+    padding: 8,
+    borderRadius: 4,
+    marginRight: 8,
+    marginBottom: 8,
+  },
   emptyList: {
     fontStyle: 'italic',
     color: '#666',
     textAlign: 'center',
     padding: 8,
   },
-  itemContainer: {
+  bookItem: {
     backgroundColor: '#fff',
     padding: 12,
     marginBottom: 8,
     borderRadius: 8,
     borderLeftWidth: 4,
-  },
-  bookItem: {
     borderLeftColor: '#1e88e5',
   },
-  customerItem: {
-    borderLeftColor: '#4caf50',
+  bookHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  popularBookItem: {
-    borderLeftColor: '#ff9800',
-  },
-  returnItem: {
-    borderLeftColor: '#9c27b0',
-  },
-  itemTitle: {
+  bookTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+    flex: 1,
   },
-  itemSubtitle: {
+  bookStatus: {
+    fontSize: 12,
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    color: '#1e88e5',
+  },
+  bookAuthor: {
     fontSize: 14,
     color: '#666',
     marginTop: 4,
+  },
+  bookDates: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 8,
+  },
+  historyItem: {
+    backgroundColor: '#fff',
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#9e9e9e',
+  },
+  historyTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  historyAuthor: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  historyDate: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 8,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -414,7 +466,88 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
+  categoryList: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  categoryItem: {
+    backgroundColor: '#fff',
+    padding: 12,
+    marginRight: 8,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  categoryName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  categoryCount: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  notificationItem: {
+    backgroundColor: '#fff',
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff9800',
+  },
+  notificationText: {
+    fontSize: 14,
+  },
+  notificationDate: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+    textAlign: 'right',
+  },
+  recommendationItem: {
+    backgroundColor: '#fff',
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50',
+  },
+  recommendationText: {
+    fontSize: 14,
+  },
+  reviewItem: {
+    backgroundColor: '#fff',
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ffc107',
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  reviewTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  reviewRating: {
+    fontSize: 12,
+  },
+  reviewComment: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    marginTop: 8,
+    color: '#555',
+  },
+  reviewDate: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 8,
+    textAlign: 'right',
+  },
 });
-
 
 export default DashboardClientScreen;
