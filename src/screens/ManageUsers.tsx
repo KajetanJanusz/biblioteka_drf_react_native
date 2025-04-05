@@ -109,7 +109,6 @@ const ManageUsersScreen = () => {
             </View>
           </View>
         )}
-          {/* Header with Add User Button */}
           <View style={styles.header}>
           <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddUser')}>
             <Text style={styles.addButtonText}>+ Add User</Text>

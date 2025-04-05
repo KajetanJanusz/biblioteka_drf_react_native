@@ -8,37 +8,40 @@ import {
   ActivityIndicator,
   Alert,
   SafeAreaView,
-  Platform,
-  StatusBar,
   ScrollView,
 } from 'react-native';
 import { userApi } from '../services/apiServices.ts';
 import { useRoute, useNavigation } from '@react-navigation/native';
 
+interface UserDetails {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+}
+
 const DetailUsersScreen = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [userDetails, setUserDetails] = useState({
+  const [userDetails, setUserDetails] = useState<UserDetails>({
     first_name: '',
     last_name: '',
     email: '',
     phone: '',
   });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [editing, setEditing] = useState<boolean>(false);
 
   const route = useRoute();
   const navigation = useNavigation();
   const userId = route.params?.user_id;
 
   useEffect(() => {
-    fetchUserDetails();
+    if (userId) fetchUserDetails();
   }, [userId]);
 
   const fetchUserDetails = async () => {
     try {
       setLoading(true);
       const response = await userApi.getUserDetails(userId);
-      setUser(response.data);
       setUserDetails({
         first_name: response.data.first_name || '',
         last_name: response.data.last_name || '',
@@ -52,14 +55,15 @@ const DetailUsersScreen = () => {
     }
   };
 
-  const handleChange = (key, value) => {
-    setUserDetails({ ...userDetails, [key]: value });
+  const handleChange = (key: keyof UserDetails, value: string) => {
+    setUserDetails((prev) => ({ ...prev, [key]: value }));
   };
 
   const saveChanges = async () => {
+    if (!userId) return;
     try {
       setLoading(true);
-      await userApi.updateUser(userId, userDetails);
+      await userApi.editUser(userId, userDetails);
       Alert.alert('Success', 'User details updated successfully');
       setEditing(false);
       fetchUserDetails();
@@ -71,29 +75,26 @@ const DetailUsersScreen = () => {
   };
 
   const deleteUser = async () => {
-    Alert.alert(
-      'Confirm Deletion',
-      'Are you sure you want to delete this user?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await userApi.deleteUser(userId);
-              Alert.alert('Deleted', 'User has been deleted successfully');
-              navigation.goBack();
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.detail || 'Failed to delete user');
-            } finally {
-              setLoading(false);
-            }
-          },
+    if (!userId) return;
+    Alert.alert('Confirm Deletion', 'Are you sure you want to delete this user?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setLoading(true);
+            await userApi.deleteUser(userId.toString());
+            Alert.alert('Deleted', 'User has been deleted successfully');
+            navigation.goBack();
+          } catch (error) {
+            Alert.alert('Error', error.response?.data?.detail || 'Failed to delete user');
+          } finally {
+            setLoading(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const goBack = () => navigation.goBack();
@@ -103,16 +104,6 @@ const DetailUsersScreen = () => {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           <ActivityIndicator size="large" color="#0066CC" style={styles.loader} />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (!user) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <Text style={styles.errorText}>User not found</Text>
         </View>
       </SafeAreaView>
     );
@@ -136,8 +127,8 @@ const DetailUsersScreen = () => {
                 style={styles.input}
                 placeholder={key.replace('_', ' ')}
                 placeholderTextColor="#666"
-                value={userDetails[key]}
-                onChangeText={(text) => handleChange(key, text)}
+                value={userDetails[key as keyof UserDetails]}
+                onChangeText={(text) => handleChange(key as keyof UserDetails, text)}
                 editable={editing}
               />
             ))}
@@ -163,106 +154,23 @@ const DetailUsersScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: '#1e88e5',
-      paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    container: {
-      flex: 1,
-      backgroundColor: '#f5f5f5',
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#1e88e5',
-      paddingTop: Platform.OS === 'ios' ? 0 : 16,
-      paddingBottom: 16,
-      paddingHorizontal: 16,
-    },
-    headerTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: '#fff',
-      marginLeft: 16,
-    },
-    backButton: {
-      padding: 8,
-    },
-    backButtonText: {
-      fontSize: 24,
-      color: '#fff',
-      fontWeight: 'bold',
-    },
-    scrollContainer: {
-      flex: 1,
-    },
-    userCard: {
-      backgroundColor: '#fff',
-      margin: 16,
-      borderRadius: 12,
-      padding: 16,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: '#333',
-      marginBottom: 12,
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: '#ccc',
-      borderRadius: 8,
-      padding: 10,
-      fontSize: 16,
-      marginBottom: 12,
-      backgroundColor: '#fff',
-    },
-    editButton: {
-      backgroundColor: '#ff9800',
-      paddingVertical: 12,
-      borderRadius: 8,
-    },
-    editButtonText: {
-      color: '#fff',
-      fontWeight: 'bold',
-      textAlign: 'center',
-      fontSize: 16,
-    },
-    saveButton: {
-      backgroundColor: '#4caf50',
-      paddingVertical: 12,
-      borderRadius: 8,
-    },
-    saveButtonText: {
-      color: '#fff',
-      fontWeight: 'bold',
-      textAlign: 'center',
-      fontSize: 16,
-    },
-    deleteButton: {
-        backgroundColor: '#d32f2f',
-        paddingVertical: 12,
-        borderRadius: 8,
-        marginTop: 10,
-      },
-      deleteButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontSize: 16,
-      },
-    loader: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    errorText: {
-      fontSize: 16,
-      color: '#f44336',
-      textAlign: 'center',
-      marginTop: 32,
-    },
-  });
+  safeArea: { flex: 1, backgroundColor: '#F5F5F5' },
+  container: { flex: 1, padding: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  backButton: { marginRight: 10 },
+  backButtonText: { fontSize: 24 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold' },
+  scrollContainer: { flex: 1 },
+  userCard: { backgroundColor: '#fff', padding: 16, borderRadius: 8, shadowOpacity: 0.1 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  input: { borderBottomWidth: 1, borderBottomColor: '#ddd', marginBottom: 10, paddingVertical: 8 },
+  saveButton: { backgroundColor: '#4CAF50', padding: 12, borderRadius: 8, marginTop: 10 },
+  saveButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  editButton: { backgroundColor: '#2196F3', padding: 12, borderRadius: 8, marginTop: 10 },
+  editButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  deleteButton: { backgroundColor: '#FF3B30', padding: 12, borderRadius: 8, marginTop: 10 },
+  deleteButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  loader: { marginTop: 20 },
+});
   
   export default DetailUsersScreen;

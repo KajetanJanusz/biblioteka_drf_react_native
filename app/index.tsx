@@ -8,12 +8,15 @@ import DashboardCustomer from '../src/screens/DashboardCustomer';
 import DashboardEmployee from '../src/screens/DashboardEmployee';
 import ManageUsers from '../src/screens/ManageUsers';
 import AddUser from '../src/screens/AddUser';
+import AddBook from '../src/screens/AddBook';
 import DetailsUsers from '../src/screens/DetailsUsers';
 import ListBooks from '../src/screens/ListBooks';
 import DetailsBook from '../src/screens/DetailsBook';
+import DetailsBookEmployee from '../src/screens/DetailsBookEmployee';
 import ManageBooks from '../src/screens/ManageBooks';
 import ReturnBook from '../src/screens/ReturnBook';
 import ReturnApprove from '../src/screens/ReturnApprove';
+import EditBook from '../src/screens/EditBook';
 
 const Stack = createStackNavigator();
 
@@ -27,12 +30,15 @@ export default function App() {
       <Stack.Screen name="DashboardEmployee" component={DashboardEmployee} options={{ headerShown: false }} />
       <Stack.Screen name="ManageUsers" component={ManageUsers} options={{ headerShown: false }} />
       <Stack.Screen name="AddUser" component={AddUser} options={{ headerShown: false }} />
+      <Stack.Screen name="AddBook" component={AddBook} options={{ headerShown: false }} />
       <Stack.Screen name="DetailsUsers" component={DetailsUsers} options={{ headerShown: false }} />
       <Stack.Screen name="ListBooks" component={ListBooks} options={{ headerShown: false }} />
       <Stack.Screen name="DetailsBook" component={DetailsBook} options={{ headerShown: false }} />
+      <Stack.Screen name="DetailsBookEmployee" component={DetailsBookEmployee} options={{ headerShown: false }} />
       <Stack.Screen name="ManageBooks" component={ManageBooks} options={{ headerShown: false }} />
       <Stack.Screen name="ReturnBook" component={ReturnBook} options={{ headerShown: false }} />
       <Stack.Screen name="ReturnApprove" component={ReturnApprove} options={{ headerShown: false }} />
+      <Stack.Screen name="EditBook" component={EditBook} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

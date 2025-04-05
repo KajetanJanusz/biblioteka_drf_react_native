@@ -248,6 +248,13 @@ const borrowBook = async () => {
                 {available_copies > 0 ? 'Borrow Book' : 'Currently Unavailable'}
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.borrowButton}
+              onPress={() => navigation.navigate('EditBook', { id: bookId })}
+            >
+              <Text style={styles.actionButtonText}>Edytuj książkę</Text>
+            </TouchableOpacity>
+
 
           </View>
           

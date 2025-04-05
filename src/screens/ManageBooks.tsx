@@ -88,7 +88,7 @@ const BookListScreen = () => {
           !isAvailable && styles.unavailableBook
         ]}
         onPress={() => {
-          navigation.navigate('DetailsBook', { id: item.id });
+          navigation.navigate('DetailsBookEmployee', { id: item.id });
         }}
       >
         <View style={styles.bookHeader}>
@@ -161,6 +161,11 @@ const BookListScreen = () => {
             </View>
           </View>
         )}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddBook')}>
+            <Text style={styles.addButtonText}>+ Add Book</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
@@ -393,6 +398,17 @@ const styles = StyleSheet.create({
     color: '#333',
     flex: 1,
     marginRight: 8,
+  },
+  addButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1e88e5',
   },
   availabilityBadge: {
     paddingHorizontal: 8,

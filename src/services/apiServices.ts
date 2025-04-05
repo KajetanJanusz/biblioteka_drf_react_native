@@ -45,7 +45,7 @@ export const userApi = {
   editUser: (userId: number, userData: Omit<UserData, 'is_active' | 'is_employee'>) => 
     api.put(`users/edit/${userId}`, userData),
   deleteUser: (userId: string) => 
-    api.delete(`users/delete/${userId}`),
+    api.post(`users/delete/${userId}`),
   activateUser: (userId: string) => 
     api.put(`users/active/${userId}`),
 };
@@ -59,7 +59,7 @@ export const bookApi = {
   editBook: (bookId: number, bookData: BookData) => 
     api.put(`books/edit/${bookId}`, bookData),
   deleteBook: (bookId: number) => 
-    api.delete(`books/delete/${bookId}`),
+    api.post(`books/delete/${bookId}`),
   borrowBook: (bookId: number) => 
     api.post(`books/borrow/${bookId}`),
   returnBook: (rentalId: number) => 
