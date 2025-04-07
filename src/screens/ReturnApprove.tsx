@@ -101,26 +101,28 @@ const ReturnApprove = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Changed from #1e88e5 to darker blue
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f7f1', // Changed from #f5f5f5 to paper-like color
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Changed to match safeArea
     paddingTop: Platform.OS === 'ios' ? 0 : 16,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    elevation: 4, // Added elevation for shadow on Android
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22, // Increased from 18
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#f9f7f1', // Changed from #fff to paper color
     marginLeft: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Added book-like font
   },
   buttonsContainer: {
     flex: 1,
@@ -138,21 +140,27 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 24,
-    color: '#fff',
+    color: '#f9f7f1', // Changed from #fff to paper color
     fontWeight: 'bold',
   },
   button: {
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Changed from #1e88e5 to darker blue
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
     width: '80%',
     alignItems: 'center',
+    shadowColor: '#000', // Added shadow properties for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
   },
   buttonText: {
-    color: '#fff',
+    color: '#f9f7f1', // Changed from #fff to paper color
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif', // Added consistent font
   },
   loadingContainer: {
     flex: 1,
@@ -163,7 +171,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
     fontSize: 16,
-    color: 'red',
+    color: '#922b21', // Changed from red to a more elegant dark red
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Added consistent font
   },
 });
 

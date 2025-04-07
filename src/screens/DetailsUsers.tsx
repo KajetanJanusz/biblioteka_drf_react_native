@@ -8,24 +8,26 @@ import {
   ActivityIndicator,
   Alert,
   SafeAreaView,
+  StatusBar,
   ScrollView,
+  Platform
 } from 'react-native';
 import { userApi } from '../services/apiServices.ts';
 import { useRoute, useNavigation } from '@react-navigation/native';
 
 interface UserDetails {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
+  imię: string;
+  nazwisko: string;
+  adres_email: string;
+  numer_telefonu: string;
 }
 
 const DetailUsersScreen = () => {
   const [userDetails, setUserDetails] = useState<UserDetails>({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
+    imię: '',
+    nazwisko: '',
+    adres_email: '',
+    numer_telefonu: '',
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [editing, setEditing] = useState<boolean>(false);
@@ -43,10 +45,10 @@ const DetailUsersScreen = () => {
       setLoading(true);
       const response = await userApi.getUserDetails(userId);
       setUserDetails({
-        first_name: response.data.first_name || '',
-        last_name: response.data.last_name || '',
-        email: response.data.email || '',
-        phone: response.data.phone || '',
+        imię: response.data.first_name || '',
+        nazwisko: response.data.last_name || '',
+        adres_email: response.data.email || '',
+        numer_telefonu: response.data.phone || '',
       });
     } catch (error) {
       Alert.alert('Error', error.response?.data?.detail || 'Failed to fetch user details');
@@ -64,11 +66,11 @@ const DetailUsersScreen = () => {
     try {
       setLoading(true);
       await userApi.editUser(userId, userDetails);
-      Alert.alert('Success', 'User details updated successfully');
+      Alert.alert('Sukces', 'Użytkownik edytowany pomyślnie');
       setEditing(false);
       fetchUserDetails();
     } catch (error) {
-      Alert.alert('Error', error.response?.data?.detail || 'Failed to update user details');
+      Alert.alert('Error', error.response?.data?.detail || 'Błąd aktualizacji użytkownika');
     } finally {
       setLoading(false);
     }
@@ -76,19 +78,19 @@ const DetailUsersScreen = () => {
 
   const deleteUser = async () => {
     if (!userId) return;
-    Alert.alert('Confirm Deletion', 'Are you sure you want to delete this user?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert('Potwierdź usunięcie', 'Czy aby napewno chcesz usunąć użytkownika?', [
+      { text: 'Anuluj', style: 'cancel' },
       {
-        text: 'Delete',
+        text: 'Usuń',
         style: 'destructive',
         onPress: async () => {
           try {
             setLoading(true);
             await userApi.deleteUser(userId.toString());
-            Alert.alert('Deleted', 'User has been deleted successfully');
+            Alert.alert('Usunięto', 'Użytkownik pomyślnie usunięty');
             navigation.goBack();
           } catch (error) {
-            Alert.alert('Error', error.response?.data?.detail || 'Failed to delete user');
+            Alert.alert('Error', error.response?.data?.detail || 'Błąd w usunięciu użyktkownika');
           } finally {
             setLoading(false);
           }
@@ -116,11 +118,11 @@ const DetailUsersScreen = () => {
           <TouchableOpacity onPress={goBack} style={styles.backButton}>
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>User Details</Text>
+          <Text style={styles.headerTitle}>Szczegóły użytkownika</Text>
         </View>
         <ScrollView style={styles.scrollContainer}>
           <View style={styles.userCard}>
-            <Text style={styles.sectionTitle}>User Information</Text>
+            <Text style={styles.sectionTitle}>Informacje o użytkowniku</Text>
             {Object.keys(userDetails).map((key) => (
               <TextInput
                 key={key}
@@ -134,15 +136,15 @@ const DetailUsersScreen = () => {
             ))}
             {editing ? (
               <TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
-                <Text style={styles.saveButtonText}>Save Changes</Text>
+                <Text style={styles.saveButtonText}>Zapisz zmiany</Text>
               </TouchableOpacity>
             ) : (
               <>
                 <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)}>
-                  <Text style={styles.editButtonText}>Edit</Text>
+                  <Text style={styles.editButtonText}>Edytuj</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.deleteButton} onPress={deleteUser}>
-                  <Text style={styles.deleteButtonText}>Delete</Text>
+                  <Text style={styles.deleteButtonText}>Usuń</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -154,23 +156,117 @@ const DetailUsersScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F5F5F5' },
-  container: { flex: 1, padding: 16 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-  backButton: { marginRight: 10 },
-  backButtonText: { fontSize: 24 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold' },
-  scrollContainer: { flex: 1 },
-  userCard: { backgroundColor: '#fff', padding: 16, borderRadius: 8, shadowOpacity: 0.1 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  input: { borderBottomWidth: 1, borderBottomColor: '#ddd', marginBottom: 10, paddingVertical: 8 },
-  saveButton: { backgroundColor: '#4CAF50', padding: 12, borderRadius: 8, marginTop: 10 },
-  saveButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
-  editButton: { backgroundColor: '#2196F3', padding: 12, borderRadius: 8, marginTop: 10 },
-  editButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
-  deleteButton: { backgroundColor: '#FF3B30', padding: 12, borderRadius: 8, marginTop: 10 },
-  deleteButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
-  loader: { marginTop: 20 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#2c3e50',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#f9f7f1',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2c3e50',
+    paddingTop: Platform.OS === 'ios' ? 0 : 16,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    elevation: 4,
+  },
+  backButton: {
+    padding: 10,
+    borderRadius: 20,
+  },
+  backButtonText: {
+    fontSize: 28,
+    color: '#f9f7f1',
+    fontWeight: 'bold',
+  },
+  headerTitle: { 
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#f9f7f1',
+    marginLeft: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  scrollContainer: { 
+    flex: 1 
+  },
+  userCard: { 
+    backgroundColor: '#f9f7f1', 
+    padding: 16, 
+    borderRadius: 8, 
+    shadowOpacity: 0.1 
+  },
+  sectionTitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginBottom: 10 
+  },
+  input: { 
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#d1c7b7',
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+  },
+  saveButton: { 
+    backgroundColor: '#4CAF50', 
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+    marginLeft: 8,
+    elevation: 2,
+  },
+  saveButtonText: { 
+    color: '#f9f7f1',
+    fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+  },
+  editButton: { 
+    backgroundColor: '#2c3e50',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+    elevation: 2,
+  },
+  editButtonText: { 
+    color: '#f9f7f1',
+    fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+  },
+  deleteButton: { 
+    backgroundColor: '#FF3B30', 
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+    elevation: 2,
+    top: 10,
+  },
+  deleteButtonText: { 
+    color: '#f9f7f1',
+    fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
   
   export default DetailUsersScreen;

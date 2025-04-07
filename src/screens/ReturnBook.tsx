@@ -28,30 +28,11 @@ const BookReturn = () => {
     setLoading(true);
     try {
       await bookApi.returnBook(rentalId);
-      Alert.alert('Success', 'Return request submitted!');
+      Alert.alert('Sukces', 'Zwrot wysłany!');
       navigation.goBack();
     } catch (error) {
         console.error('Return error:', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'Failed to submit return request');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const markAsRead = async () => {
-    if (!notificationId) {
-      Alert.alert('Error', 'Notification ID is missing');
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      await bookApi.markAsRead(notificationId);
-      Alert.alert('Success', 'Book marked as read!');
-      navigation.goBack();
-    } catch (error) {
-        console.error('Mark as read error:', error.response ? error.response.data : error.message);
-      Alert.alert('Error', 'Failed to mark book as read');
     } finally {
       setLoading(false);
     }
@@ -66,7 +47,7 @@ const BookReturn = () => {
     setLoading(true);
     try {
       await bookApi.extendRental(rentalId);
-      Alert.alert('Success', 'Rental extended for 7 days!');
+      Alert.alert('Sukces', 'Wypożyczenie przedłużone o 7 dni!');
     } catch (error) {
         console.error('Extend rental error:', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'Failed to extend rental');
@@ -83,7 +64,7 @@ const BookReturn = () => {
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
               <Text style={styles.backButtonText}>←</Text>
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Book Return</Text>
+            <Text style={styles.headerTitle}>Powrót</Text>
           </View>
           <View style={styles.contentContainer}>
             <Text style={styles.errorText}>
@@ -106,10 +87,10 @@ const BookReturn = () => {
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
               <Text style={styles.backButtonText}>←</Text>
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Book Return</Text>
+            <Text style={styles.headerTitle}>Powrót</Text>
           </View>
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0066CC" />
+            <ActivityIndicator size="large" color="#2c3e50" />
           </View>
         </View>
       </SafeAreaView>
@@ -124,7 +105,7 @@ const BookReturn = () => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Book Return</Text>
+          <Text style={styles.headerTitle}>Powrót</Text>
         </View>
 
         <View style={styles.buttonsContainer}>
@@ -132,11 +113,7 @@ const BookReturn = () => {
             <Text style={styles.buttonText}>Zwróć książkę</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.buttonSecondary} onPress={markAsRead}>
-            <Text style={styles.buttonText}>Przeczytane</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.buttonThird} onPress={extendRental}>
+          <TouchableOpacity style={styles.buttonExtend} onPress={extendRental}>
             <Text style={styles.buttonText}>Przedłuż o 7 dni</Text>
           </TouchableOpacity>
         </View>
@@ -148,31 +125,38 @@ const BookReturn = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f7f1',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50',
     paddingTop: Platform.OS === 'ios' ? 0 : 16,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#f9f7f1',
     marginLeft: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   buttonsContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   contentContainer: {
     flex: 1,
@@ -185,37 +169,40 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 24,
-    color: '#fff',
+    color: '#f9f7f1',
     fontWeight: 'bold',
   },
   button: {
-    backgroundColor: '#1e88e5',
-    padding: 12,
+    backgroundColor: '#2c3e50',
+    padding: 16,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 20,
     width: '80%',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  buttonSecondary: {
-    backgroundColor: '#4caf50',
-    padding: 12,
+  buttonExtend: {
+    backgroundColor: '#27ae60',
+    padding: 16,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 20,
     width: '80%',
     alignItems: 'center',
-  },
-  buttonThird: {
-    backgroundColor: '#4caf50',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-    width: '80%',
-    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonText: {
-    color: '#fff',
+    color: '#f9f7f1',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   loadingContainer: {
     flex: 1,
@@ -226,7 +213,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
     fontSize: 16,
-    color: 'red',
+    color: '#922b21',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
 });
 

@@ -9,6 +9,9 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Platform,
+  StatusBar,
+  SafeAreaView,
 } from 'react-native';
 import { register } from '../services/authService';
 import { useNavigation } from '@react-navigation/native';
@@ -25,12 +28,12 @@ const RegisterScreen = () => {
 
   const handleRegister = async () => {
     if (!username || !email || !password) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      Alert.alert('Błąd', 'Proszę wypełnić wszystkie wymagane pola');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert('Błąd', 'Hasła nie są takie same');
       return;
     }
 
@@ -38,14 +41,14 @@ const RegisterScreen = () => {
     try {
       await register({ username, email, password, first_name: firstName, last_name: lastName });
       Alert.alert(
-        'Registration Successful',
-        'You can now login with your credentials',
+        'Rejestracja zakończona',
+        'Możesz teraz zalogować się do swojego konta',
         [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
       );
     } catch (error) {
       Alert.alert(
-        'Registration Failed',
-        error.response?.data?.detail || 'An error occurred during registration'
+        'Błąd',
+        error.response?.data?.detail || 'Wystąpił błąd podczas rejestracji'
       );
     } finally {
       setIsLoading(false);
@@ -53,142 +56,163 @@ const RegisterScreen = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Library App</Text>
-      <Text style={styles.subtitle}>Create your account</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Rejestracja</Text>
+        <Text style={styles.subtitle}>Utwórz nowe konto</Text>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Username</Text>
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          placeholder="Choose a username"
-          autoCapitalize="none"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Nazwa użytkownika</Text>
+          <TextInput
+            style={styles.input}
+            value={username}
+            onChangeText={setUsername}
+            placeholder="Wybierz nazwę użytkownika"
+            autoCapitalize="none"
+            placeholderTextColor="#666"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Enter your email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>E-mail</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Podaj adres e-mail"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor="#666"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>First Name</Text>
-        <TextInput
-          style={styles.input}
-          value={firstName}
-          onChangeText={setFirstName}
-          placeholder="Enter your first name"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Imię</Text>
+          <TextInput
+            style={styles.input}
+            value={firstName}
+            onChangeText={setFirstName}
+            placeholder="Wpisz swoje imię"
+            placeholderTextColor="#666"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Last Name</Text>
-        <TextInput
-          style={styles.input}
-          value={lastName}
-          onChangeText={setLastName}
-          placeholder="Enter your last name"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Nazwisko</Text>
+          <TextInput
+            style={styles.input}
+            value={lastName}
+            onChangeText={setLastName}
+            placeholder="Wpisz swoje nazwisko"
+            placeholderTextColor="#666"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Create a password"
-          secureTextEntry
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Hasło</Text>
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Utwórz hasło"
+            secureTextEntry
+            placeholderTextColor="#666"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Confirm Password</Text>
-        <TextInput
-          style={styles.input}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          placeholder="Confirm your password"
-          secureTextEntry
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Powtórz hasło</Text>
+          <TextInput
+            style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Wpisz ponownie hasło"
+            secureTextEntry
+            placeholderTextColor="#666"
+          />
+        </View>
 
-      <TouchableOpacity
-        style={styles.registerButton}
-        onPress={handleRegister}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Register</Text>
-        )}
-      </TouchableOpacity>
-
-      <View style={styles.loginContainer}>
-        <Text>Already have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.loginText}>Login</Text>
+        <TouchableOpacity
+          style={styles.registerButton}
+          onPress={handleRegister}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Zarejestruj się</Text>
+          )}
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+
+        <View style={styles.loginContainer}>
+          <Text>Masz już konto? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginText}>Zaloguj się</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#2c3e50',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
   container: {
     flexGrow: 1,
+    backgroundColor: '#f9f7f1',
     padding: 20,
     justifyContent: 'center',
-    backgroundColor: '#fff',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
     textAlign: 'center',
+    color: '#2c3e50',
+    marginBottom: 8,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   subtitle: {
     fontSize: 16,
     color: '#666',
-    marginBottom: 30,
     textAlign: 'center',
+    marginBottom: 30,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   label: {
-    fontSize: 16,
-    marginBottom: 5,
+    fontSize: 15,
     color: '#333',
+    marginBottom: 6,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   input: {
+    height: 50,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#d1c7b7',
     borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   registerButton: {
-    backgroundColor: '#0066CC',
-    padding: 15,
+    backgroundColor: '#1e88e5',
+    paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    elevation: 2,
     marginTop: 10,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#f9f7f1',
     fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   loginContainer: {
     flexDirection: 'row',
@@ -196,7 +220,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   loginText: {
-    color: '#0066CC',
+    color: '#1e88e5',
     fontWeight: 'bold',
   },
 });

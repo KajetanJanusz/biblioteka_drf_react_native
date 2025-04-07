@@ -59,11 +59,11 @@ const BookListScreen = () => {
   // Get category name (in a real app, you'd map category IDs to names)
   const getCategoryName = (categoryId) => {
     const categoryMap = {
-      1: 'Science Fiction',
-      2: 'Fantasy',
-      3: 'History',
-      4: 'Biography',
-      5: 'Literature',
+      1: 'Fantastyka naukowa',
+      2: 'Fantastyka',
+      3: 'Historia',
+      4: 'Biografia',
+      5: 'Literatura',
       // Add more mappings as needed
     };
     return categoryMap[categoryId] || `Category ${categoryId}`;
@@ -77,45 +77,41 @@ const BookListScreen = () => {
     
     return matchesSearch && matchesCategory;
   });
-
-  const renderBookItem = ({ item }) => {
+const renderBookItem = ({ item }) => {
     const isAvailable = item.available_copies > 0;
-    
+  
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
-          styles.bookItem, 
+          styles.bookItem,
           !isAvailable && styles.unavailableBook
         ]}
         onPress={() => {
           navigation.navigate('DetailsBookEmployee', { id: item.id });
         }}
       >
-        <View style={styles.bookHeader}>
-          <Text style={styles.bookTitle}>{item.title}</Text>
-          <View style={[
-            styles.availabilityBadge, 
-            {backgroundColor: isAvailable ? '#4caf50' : '#f44336'}
-          ]}>
-            <Text style={styles.availabilityText}>
-              {isAvailable ? `${item.available_copies} Available` : 'Unavailable'}
-            </Text>
-          </View>
-        </View>
-        
-        <Text style={styles.bookAuthor}>by {item.author}</Text>
-        
+        <Text style={styles.bookTitle}>{item.title}</Text>
+  
         <View style={styles.categoryBadge}>
           <Text style={styles.categoryText}>{getCategoryName(item.category)}</Text>
         </View>
-        
-        <Text 
-          style={styles.bookDescription}
-          numberOfLines={3}
-          ellipsizeMode="tail"
-        >
-          {item.description}
-        </Text>
+  
+        <View style={[
+          styles.availabilityBadge,
+          { backgroundColor: isAvailable ? '#4caf50' : '#f44336' }
+        ]}>
+          <Text style={styles.availabilityText}>
+            {isAvailable
+              ? `${item.available_copies} ${
+                  item.available_copies === 1
+                    ? 'Dostępna'
+                    : item.available_copies <= 4
+                    ? 'Dostępne'
+                    : 'Dostępnych'
+                }`
+              : 'Niedostępna'}
+          </Text>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -132,7 +128,7 @@ const BookListScreen = () => {
               <View style={styles.menuBar} />
             </View>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Library Books</Text>
+          <Text style={styles.headerTitle}>Książki</Text>
         </View>
 
         {/* Side Menu (when open) */}
@@ -147,23 +143,23 @@ const BookListScreen = () => {
                 <Text style={styles.menuTitle}>Menu</Text>
               </View>
               <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('DashboardEmployee')}>
-                <Text style={styles.menuItemText}>Dashboard</Text>
+                <Text style={styles.menuItemText}>Strona główna</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ManageBooks')}>
-                <Text style={styles.menuItemText}>Manage Books</Text>
+                <Text style={styles.menuItemText}>Zarządzaj książkami</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ManageUsers')}>
-                <Text style={styles.menuItemText}>Manage Users</Text>
+                <Text style={styles.menuItemText}>Zarządzaj użytkownikami</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Logout')}>
-                <Text style={styles.menuItemText}>Logout</Text>
+                <Text style={styles.menuItemText}>Wyloguj się</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
         <View style={styles.header}>
           <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddBook')}>
-            <Text style={styles.addButtonText}>+ Add Book</Text>
+            <Text style={styles.addButtonText}>+ Dodaj książkę</Text>
           </TouchableOpacity>
         </View>
 
@@ -171,7 +167,7 @@ const BookListScreen = () => {
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search books by title or author..."
+            placeholder="Szukaj książek po tytule lub autorze..."
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -179,10 +175,10 @@ const BookListScreen = () => {
 
         {/* Category Filter Horizontal Scrollable */}
         <View>
-          <Text style={styles.sectionTitle}>Categories:</Text>
+          <Text style={styles.sectionTitle}>Kategorie:</Text>
           <FlatList
             horizontal
-            data={[{ id: null, name: 'All' }, ...categories.map(id => ({ id, name: getCategoryName(id) }))]
+            data={[{ id: null, name: 'Wszystkie' }, ...categories.map(id => ({ id, name: getCategoryName(id) }))]
             }
             keyExtractor={(item) => `category-${item.id || 'all'}`}
             renderItem={({ item }) => (
@@ -211,9 +207,14 @@ const BookListScreen = () => {
           <ActivityIndicator size="large" color="#0066CC" style={styles.loader} />
         ) : (
           <>
-            <Text style={styles.resultsText}>
-              {filteredBooks.length} {filteredBooks.length === 1 ? 'book' : 'books'} found
-            </Text>
+          <Text style={styles.resultsText}>
+          Znaleziono {filteredBooks.length} {''}
+            {filteredBooks.length === 1
+              ? 'książkę'
+              : (filteredBooks.length >= 2 && filteredBooks.length <= 4)
+              ? 'książki'
+              : 'książek'}
+          </Text>
             <FlatList
               data={filteredBooks}
               renderItem={renderBookItem}
@@ -221,8 +222,9 @@ const BookListScreen = () => {
               contentContainerStyle={styles.bookList}
               showsVerticalScrollIndicator={false}
               ListEmptyComponent={
-                <Text style={styles.emptyList}>No books match your search criteria</Text>
+                <Text style={styles.emptyList}>Brak wyników dla podanych kryteriów</Text>
               }
+              numColumns={2}
             />
           </>
         )}
@@ -234,26 +236,28 @@ const BookListScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Ciemniejszy niebieski - bardziej elegancki
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f7f1', // Kolor przypominający papier - nawiązanie do książek
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Spójny z safeArea
     paddingTop: Platform.OS === 'ios' ? 0 : 16,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    elevation: 4,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#f9f7f1', // Kolor papieru dla kontrastu
     marginLeft: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Czcionka kojarząca się z książkami
   },
   menuButton: {
     padding: 8,
@@ -266,8 +270,9 @@ const styles = StyleSheet.create({
   menuBar: {
     height: 3,
     width: 24,
-    backgroundColor: '#fff',
-    borderRadius: 1,
+    backgroundColor: '#f9f7f1',
+    borderRadius: 2,
+    marginVertical: 1,
   },
   menuOverlay: {
     position: 'absolute',
@@ -280,81 +285,95 @@ const styles = StyleSheet.create({
   },
   menuOverlayBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)', // Ciemniejsze tło dla lepszego kontrastu
   },
   sideMenu: {
     width: '70%',
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f7f1',
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 10,
     position: 'absolute',
     left: 0,
     top: 0,
     bottom: 0,
   },
   menuHeader: {
-    padding: 20,
-    backgroundColor: '#1e88e5',
+    padding: 24,
+    backgroundColor: '#2c3e50',
   },
   menuTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#f9f7f1',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   menuItem: {
-    padding: 16,
+    padding: 18,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#e8e0d5', // Subtelna linia oddzielająca
   },
   menuItemText: {
     fontSize: 16,
-    color: '#333',
+    color: '#2c3e50',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   searchContainer: {
     padding: 16,
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e8e0d5',
   },
   searchInput: {
-    height: 40,
+    height: 44,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 20,
+    borderColor: '#d1c7b7', // Kolor papieru starych książek
+    borderRadius: 22,
     paddingHorizontal: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
+    fontSize: 15,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 12,
     marginHorizontal: 16,
-    color: '#333',
+    color: '#2c3e50',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   categoryList: {
     paddingHorizontal: 12,
+    paddingBottom: 8,
   },
   categoryItem: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     backgroundColor: '#fff',
     borderRadius: 20,
     marginHorizontal: 4,
+    marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#d1c7b7',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
   selectedCategoryItem: {
-    backgroundColor: '#1e88e5',
-    borderColor: '#1e88e5',
+    backgroundColor: '#2c3e50',
+    borderColor: '#2c3e50',
   },
   categoryItemText: {
-    color: '#333',
+    color: '#2c3e50',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   selectedCategoryText: {
     color: '#fff',
@@ -362,29 +381,32 @@ const styles = StyleSheet.create({
   },
   resultsText: {
     margin: 16,
-    fontSize: 14,
-    color: '#666',
+    fontSize: 15,
+    color: '#7d6e56', // Ciemniejszy odcień brązu kojarzący się z książkami
+    fontStyle: 'italic',
   },
   bookList: {
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingBottom: 16,
   },
   bookItem: {
     backgroundColor: '#fff',
+    flex: 1,
+    margin: 8,
     padding: 16,
-    marginHorizontal: 8,
-    marginBottom: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
     borderLeftWidth: 4,
-    borderLeftColor: '#1e88e5',
+    borderLeftColor: '#2c3e50',
+    maxWidth: '46%', // Nieco węższe dla lepszego marginesu
   },
   unavailableBook: {
     opacity: 0.7,
-    borderLeftColor: '#f44336',
+    borderLeftColor: '#922b21', // Ciemniejszy czerwony - bardziej elegancki
   },
   bookHeader: {
     flexDirection: 'row',
@@ -393,54 +415,59 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   bookTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-    marginRight: 8,
-  },
-  addButton: {
-    backgroundColor: '#fff',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#1e88e5',
+    color: '#2c3e50',
+    marginBottom: 12,
+    flexShrink: 1,
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   availabilityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    alignSelf: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+    marginTop: 6,
   },
   availabilityText: {
     color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   bookAuthor: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    color: '#7d6e56',
+    marginBottom: 10,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   categoryBadge: {
-    backgroundColor: '#e0e0e0',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginBottom: 8,
+    backgroundColor: '#eee8dc', // Jasny papierowy kolor
+    alignSelf: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#d1c7b7',
   },
   categoryText: {
     fontSize: 12,
-    color: '#333',
+    color: '#7d6e56',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+    fontWeight: '500',
   },
   bookDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#7d6e56',
     lineHeight: 20,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   loader: {
     flex: 1,
@@ -449,10 +476,29 @@ const styles = StyleSheet.create({
   },
   emptyList: {
     textAlign: 'center',
-    padding: 32,
+    padding: 40,
     fontSize: 16,
-    color: '#666',
+    color: '#7d6e56',
     fontStyle: 'italic',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  addButton: {
+    backgroundColor: '#2c3e50', // Ciemniejszy niebieski spójny z safeArea i header
+    paddingVertical: 10, // Większy padding dla wygodniejszego kliknięcia
+    paddingHorizontal: 16,
+    borderRadius: 20, // Zaokrąglone rogi spójne z categoryItem
+    shadowColor: '#000', // Delikatny cień
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2, // Lekki efekt podniesienia
+  },
+  addButtonText: {
+    fontSize: 16, // Większa czcionka dla lepszej czytelności
+    fontWeight: 'bold',
+    color: '#f9f7f1', // Kolor przypominający papier, kontrastujący z ciemnym tłem
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Spójna czcionka
   },
 });
 

@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Alert,
   SafeAreaView,
+  Platform,
+  StatusBar,
   ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -15,11 +17,11 @@ import { bookApi } from '../services/apiServices.ts';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const categoryMap = {
-  1: 'Science Fiction',
-  2: 'Fantasy',
-  3: 'History',
-  4: 'Biography',
-  5: 'Literature',
+  1: 'Fantastyka naukowa',
+  2: 'Fantastyka',
+  3: 'Historia',
+  4: 'Biografia',
+  5: 'Literatura',
 };
 
 const EditBook = () => {
@@ -244,37 +246,48 @@ const EditBook = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#2c3e50',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
-    padding: 16,
+    backgroundColor: '#f9f7f1',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    backgroundColor: '#2c3e50',
+    paddingTop: Platform.OS === 'ios' ? 0 : 16,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    elevation: 4,
   },
   backButton: {
     padding: 10,
+    borderRadius: 20,
   },
   backButtonText: {
-    fontSize: 24,
+    fontSize: 28,
+    color: '#f9f7f1',
     fontWeight: 'bold',
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginLeft: 10,
+    color: '#f9f7f1',
+    marginLeft: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#d1c7b7',
     borderRadius: 8,
     marginBottom: 16,
     paddingHorizontal: 12,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   textArea: {
     height: 100,
@@ -284,20 +297,23 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     marginBottom: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#d1c7b7',
     borderRadius: 8,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   dateInput: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#d1c7b7',
     borderRadius: 8,
     marginBottom: 16,
     paddingHorizontal: 12,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     justifyContent: 'center',
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -305,25 +321,28 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   updateButton: {
-    backgroundColor: '#0066CC',
+    backgroundColor: '#2c3e50',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
     flex: 1,
     marginRight: 8,
+    elevation: 2,
   },
   deleteButton: {
-    backgroundColor: '#E53935',
+    backgroundColor: '#922b21',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
     flex: 1,
     marginLeft: 8,
+    elevation: 2,
   },
   buttonText: {
-    color: 'white',
+    color: '#f9f7f1',
     fontWeight: 'bold',
     fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   loader: {
     flex: 1,

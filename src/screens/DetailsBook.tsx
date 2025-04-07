@@ -64,12 +64,17 @@ const BookDetailsScreen = () => {
     } catch (error) {
       Alert.alert(
         'Error',
-        error.response?.data?.detail || 'Failed to fetch book details'
+        error.response?.data?.detail || 'Nie udało się pobrać szczegółów książki'
       );
     } finally {
       setLoading(false);
     }
   };
+
+  const getCoverUrl = (book) =>
+    book?.isbn
+      ? `https://covers.openlibrary.org/b/isbn/${book.isbn}-M.jpg`
+      : 'https://via.placeholder.com/150x220?text=No+Cover';
 
   // Dodaj nową funkcję do wypożyczania książki
 const borrowBook = async () => {
@@ -81,7 +86,7 @@ const borrowBook = async () => {
     await bookApi.borrowBook(bookId);
     
     // Pokaż powiadomienie o sukcesie
-    Alert.alert('Success', `You've borrowed "${book.title}"`);
+    Alert.alert('Sukces', `Wypożyczono książkę "${book.title}"`);
     
     // Odśwież dane książki, aby pokazać zaktualizowaną liczbę dostępnych egzemplarzy
     fetchBookDetails();
@@ -90,7 +95,7 @@ const borrowBook = async () => {
     // Obsłuż błędy
     Alert.alert(
       'Error',
-      error.response?.data?.detail || 'Failed to borrow the book'
+      error.response?.data?.detail || 'Nie udało się wypożyczyć książki'
     );
   } finally {
     // Zakończ ładowanie
@@ -140,7 +145,7 @@ const borrowBook = async () => {
             <TouchableOpacity onPress={goBack} style={styles.backButton}>
               <Text style={styles.backButtonText}>←</Text>
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Book Details</Text>
+            <Text style={styles.headerTitle}>Szczegóły książki</Text>
           </View>
           <ActivityIndicator size="large" color="#0066CC" style={styles.loader} />
         </View>
@@ -156,9 +161,9 @@ const borrowBook = async () => {
             <TouchableOpacity onPress={goBack} style={styles.backButton}>
               <Text style={styles.backButtonText}>←</Text>
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Book Details</Text>
+            <Text style={styles.headerTitle}>Szczegóły książki</Text>
           </View>
-          <Text style={styles.errorText}>Book not found</Text>
+          <Text style={styles.errorText}>Książka nie znaleziona</Text>
         </View>
       </SafeAreaView>
     );
@@ -174,7 +179,7 @@ const borrowBook = async () => {
           <TouchableOpacity onPress={goBack} style={styles.backButton}>
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Book Details</Text>
+          <Text style={styles.headerTitle}>Szczegóły książki</Text>
         </View>
 
         <ScrollView style={styles.scrollContainer}>
@@ -182,14 +187,16 @@ const borrowBook = async () => {
           <View style={styles.bookCard}>
             <View style={styles.bookImageContainer}>
               <View style={styles.bookImagePlaceholder}>
-                <Text style={styles.bookImagePlaceholderText}>
-                  {book.title.charAt(0)}
-                </Text>
+              <Image
+                source={{ uri: getCoverUrl(book) }}
+                style={styles.bookImage}
+                resizeMode="cover"
+              />
               </View>
             </View>
 
             <Text style={styles.bookTitle}>{book.title}</Text>
-            <Text style={styles.bookAuthor}>by {book.author}</Text>
+            <Text style={styles.bookAuthor}> {book.author}</Text>
             
             <View style={styles.bookMetaContainer}>
               <View style={styles.categoryBadge}>
@@ -201,20 +208,26 @@ const borrowBook = async () => {
                 {backgroundColor: available_copies > 0 ? '#4caf50' : '#f44336'}
               ]}>
                 <Text style={styles.availabilityText}>
-                  {available_copies > 0 
-                    ? `${available_copies} of ${book.total_copies} Available` 
-                    : 'Unavailable'}
+                {available_copies > 0 
+                  ? `${available_copies} z ${book.total_copies} ${
+                      available_copies === 1 
+                        ? 'Dostępna' 
+                        : available_copies >= 2 && available_copies <= 4 
+                        ? 'Dostępne' 
+                        : 'Dostępnych'
+                    }`
+                  : 'Niedostępna'}
                 </Text>
               </View>
             </View>
 
             <View style={styles.bookDetailsContainer}>
-              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.sectionTitle}>Opis</Text>
               <Text style={styles.bookDescription}>{book.description}</Text>
               
-              <Text style={styles.sectionTitle}>Publication Details</Text>
+              <Text style={styles.sectionTitle}>Szczegóły publikacji</Text>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Published:</Text>
+                <Text style={styles.detailLabel}>Data wydania:</Text>
                 <Text style={styles.detailValue}>{formatDate(book.published_date)}</Text>
               </View>
               <View style={styles.detailRow}>
@@ -227,10 +240,10 @@ const borrowBook = async () => {
             {can_add_notifications && (
               <TouchableOpacity 
                 style={styles.notificationButton}
-                onPress={() => Alert.alert('Notification', 'You will be notified when this book becomes available')}
+                onPress={() => Alert.alert('Powiadomienie', 'Zostaniesz powiadomiony, gdy książka będzie dostępna')}
               >
                 <Text style={styles.notificationButtonText}>
-                  Notify me when available
+                   Powiadom mnie, gdy będzie dostępna
                 </Text>
               </TouchableOpacity>
             )}
@@ -245,7 +258,7 @@ const borrowBook = async () => {
               onPress={borrowBook} // Zmiana tutaj - używamy nowej funkcji
             >
               <Text style={styles.borrowButtonText}>
-                {available_copies > 0 ? 'Borrow Book' : 'Currently Unavailable'}
+                {available_copies > 0 ? 'Wypożycz książkę' : 'Aktualnie niedostępna'}
               </Text>
             </TouchableOpacity>
 
@@ -254,7 +267,7 @@ const borrowBook = async () => {
 
           {/* Reviews Section */}
           <View style={styles.reviewsContainer}>
-            <Text style={styles.sectionTitle}>Reviews ({opinions.length})</Text>
+            <Text style={styles.sectionTitle}>Opinie ({opinions.length})</Text>
             
             {opinions.length > 0 ? (
               <FlatList
@@ -264,7 +277,7 @@ const borrowBook = async () => {
                 scrollEnabled={false}
               />
             ) : (
-              <Text style={styles.noReviewsText}>No reviews yet</Text>
+              <Text style={styles.noReviewsText}>Brak opinii</Text>
             )}
           </View>
         </ScrollView>
@@ -276,33 +289,36 @@ const borrowBook = async () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Ciemniejszy niebieski - spójny z listą książek
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f7f1', // Kolor przypominający papier - nawiązanie do książek
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Spójny z safeArea
     paddingTop: Platform.OS === 'ios' ? 0 : 16,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    elevation: 4,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#f9f7f1', // Kolor papieru dla kontrastu
     marginLeft: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Czcionka kojarząca się z książkami
   },
   backButton: {
-    padding: 8,
+    padding: 10,
+    borderRadius: 20,
   },
   backButtonText: {
-    fontSize: 24,
-    color: '#fff',
+    fontSize: 28,
+    color: '#f9f7f1',
     fontWeight: 'bold',
   },
   scrollContainer: {
@@ -312,204 +328,283 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     margin: 16,
     borderRadius: 12,
-    padding: 16,
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 5,
+    borderLeftWidth: 5,
+    borderLeftColor: '#2c3e50',
   },
   bookImageContainer: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   bookImagePlaceholder: {
-    width: 120,
-    height: 180,
-    backgroundColor: '#e0e0e0',
+    width: 140,
+    height: 200,
+    backgroundColor: '#eee8dc', // Papierowy odcień dla okładki
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#d1c7b7',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   bookImagePlaceholderText: {
-    fontSize: 48,
+    fontSize: 60,
     fontWeight: 'bold',
-    color: '#1e88e5',
+    color: '#2c3e50',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  imageWrapper: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#f0f0f0',
+  },
+  bookImage: {
+    width: '100%',
+    height: '100%',
+  },
+  cardContent: {
+    padding: 10,
   },
   bookTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#2c3e50',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   bookAuthor: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 18,
+    color: '#7d6e56', // Ciemniejszy odcień brązu
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+    fontStyle: 'italic',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   bookMetaContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+    justifyContent: 'space-around',
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
   categoryBadge: {
-    backgroundColor: '#e0e0e0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: '#eee8dc', // Jasny papierowy kolor
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#d1c7b7',
+    minWidth: 100,
+    alignItems: 'center',
   },
   categoryText: {
     fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
+    color: '#7d6e56',
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   availabilityBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 16,
+    minWidth: 120,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   availabilityText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   bookDetailsContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-    marginTop: 16,
+    color: '#2c3e50',
+    marginBottom: 14,
+    marginTop: 20,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee8dc',
+    paddingBottom: 8,
   },
   bookDescription: {
     fontSize: 16,
-    color: '#444',
+    color: '#4a4a4a',
     lineHeight: 24,
-    marginBottom: 16,
+    marginBottom: 18,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
-  // Add these to your existing styles object
   userManagementContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 15,
+    marginTop: 18,
     paddingHorizontal: 10,
   },
   editUserButton: {
-    backgroundColor: '#4285F4',
-    padding: 12,
+    backgroundColor: '#3c6382', // Bardziej stonowany niebieski
+    padding: 14,
     borderRadius: 8,
     alignItems: 'center',
     flex: 1,
     marginRight: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   deleteUserButton: {
-    backgroundColor: '#DB4437',
-    padding: 12,
+    backgroundColor: '#922b21', // Ciemniejszy czerwony
+    padding: 14,
     borderRadius: 8,
     alignItems: 'center',
     flex: 1,
     marginLeft: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   actionButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   detailRow: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 12,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0ece3',
   },
   detailLabel: {
     fontSize: 16,
-    color: '#666',
+    color: '#7d6e56',
     width: 100,
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   detailValue: {
     fontSize: 16,
-    color: '#333',
+    color: '#4a4a4a',
     flex: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   notificationButton: {
-    backgroundColor: '#ff9800',
-    paddingVertical: 12,
+    backgroundColor: '#d68438', // Cieplejszy odcień pomarańczowego
+    paddingVertical: 14,
     borderRadius: 24,
-    marginBottom: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   notificationButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
     fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   borrowButton: {
-    backgroundColor: '#1e88e5',
-    paddingVertical: 12,
+    backgroundColor: '#2c3e50',
+    paddingVertical: 14,
     borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   borrowButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
     fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   disabledButton: {
     backgroundColor: '#b0bec5',
+    opacity: 0.8,
   },
   reviewsContainer: {
     marginHorizontal: 16,
     marginBottom: 24,
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 5,
+    borderLeftWidth: 5,
+    borderLeftColor: '#d68438', // Kolor dla sekcji recenzji
   },
   opinionItem: {
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    paddingVertical: 12,
+    borderBottomColor: '#f0ece3',
+    paddingVertical: 16,
   },
   opinionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   starContainer: {
     flexDirection: 'row',
   },
   starFilled: {
-    color: '#ffc107',
-    fontSize: 18,
-    marginRight: 2,
+    color: '#f39c12', // Cieplejszy kolor złoty dla gwiazdek
+    fontSize: 20,
+    marginRight: 3,
   },
   starEmpty: {
     color: '#e0e0e0',
-    fontSize: 18,
-    marginRight: 2,
+    fontSize: 20,
+    marginRight: 3,
   },
   opinionDate: {
     fontSize: 14,
-    color: '#999',
+    color: '#7d6e56',
+    fontStyle: 'italic',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   opinionComment: {
     fontSize: 16,
-    color: '#333',
-    lineHeight: 22,
+    color: '#4a4a4a',
+    lineHeight: 24,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   noReviewsText: {
     fontSize: 16,
-    color: '#666',
+    color: '#7d6e56',
     fontStyle: 'italic',
     textAlign: 'center',
-    paddingVertical: 16,
+    paddingVertical: 20,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   loader: {
     flex: 1,
@@ -517,10 +612,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    fontSize: 16,
-    color: '#f44336',
+    fontSize: 18,
+    color: '#922b21',
     textAlign: 'center',
-    marginTop: 32,
+    marginTop: 40,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    fontStyle: 'italic',
   },
 });
 

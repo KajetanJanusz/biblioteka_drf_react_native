@@ -80,7 +80,7 @@ const ManageUsersScreen = () => {
               <View style={styles.menuBar} />
             </View>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>User Management</Text>
+          <Text style={styles.headerTitle}>Zarządzanie użytkownikami</Text>
         </View>
 
         {/* Side Menu */}
@@ -95,23 +95,23 @@ const ManageUsersScreen = () => {
                 <Text style={styles.menuTitle}>Menu</Text>
               </View>
               <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('DashboardEmployee')}>
-                <Text style={styles.menuItemText}>Dashboard</Text>
+                <Text style={styles.menuItemText}>Strona główna</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ManageBooks')}>
-                <Text style={styles.menuItemText}>Manage Books</Text>
+                <Text style={styles.menuItemText}>Zarządzanie książkami</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ManageUsers')}>
-                <Text style={styles.menuItemText}>Manage Users</Text>
+                <Text style={styles.menuItemText}>Zarządzanie użytkownikami</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Logout')}>
-                <Text style={styles.menuItemText}>Logout</Text>
+                <Text style={styles.menuItemText}>Wyloguj się</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
           <View style={styles.header}>
           <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddUser')}>
-            <Text style={styles.addButtonText}>+ Add User</Text>
+            <Text style={styles.addButtonText}>+ Dodaj użytkownika</Text>
           </TouchableOpacity>
         </View>
 
@@ -133,54 +133,64 @@ const ManageUsersScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Ciemniejszy niebieski - bardziej elegancki
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f7f1', // Kolor przypominający papier - nawiązanie do książek
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50', // Spójny z safeArea
     paddingTop: Platform.OS === 'ios' ? 0 : 16,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    elevation: 4,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#f9f7f1', // Kolor papieru dla kontrastu
     marginLeft: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Czcionka kojarząca się z książkami
   },
   addButton: {
-    backgroundColor: '#fff',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    backgroundColor: '#2c3e50', // Ciemniejszy niebieski spójny z safeArea i header
+    paddingVertical: 10, // Większy padding dla wygodniejszego kliknięcia
+    paddingHorizontal: 16,
+    borderRadius: 20, // Zaokrąglone rogi spójne z categoryItem
+    shadowColor: '#000', // Delikatny cień
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2, // Lekki efekt podniesienia
   },
   addButtonText: {
-    fontSize: 14,
+    fontSize: 16, // Większa czcionka dla lepszej czytelności
     fontWeight: 'bold',
-    color: '#1e88e5',
+    color: '#f9f7f1', // Kolor przypominający papier, kontrastujący z ciemnym tłem
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Spójna czcionka
   },
   userList: {
-    padding: 16,
+    paddingHorizontal: 8,
+    paddingBottom: 16,
   },
   userItem: {
     backgroundColor: '#fff',
+    flex: 1,
+    margin: 8,
     padding: 16,
-    marginHorizontal: 8,
-    marginBottom: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
     borderLeftWidth: 4,
-    borderLeftColor: '#1e88e5',
+    borderLeftColor: '#2c3e50',
   },
   userHeader: {
     flexDirection: 'row',
@@ -232,8 +242,9 @@ const styles = StyleSheet.create({
   menuBar: {
     height: 3,
     width: 24,
-    backgroundColor: '#fff',
-    borderRadius: 1,
+    backgroundColor: '#f9f7f1',
+    borderRadius: 2,
+    marginVertical: 1,
   },
   menuOverlay: {
     position: 'absolute',
@@ -246,38 +257,40 @@ const styles = StyleSheet.create({
   },
   menuOverlayBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)', // Ciemniejsze tło dla lepszego kontrastu
   },
   sideMenu: {
     width: '70%',
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f7f1',
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 10,
     position: 'absolute',
     left: 0,
     top: 0,
     bottom: 0,
   },
   menuHeader: {
-    padding: 20,
-    backgroundColor: '#1e88e5',
+    padding: 24,
+    backgroundColor: '#2c3e50',
   },
   menuTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#f9f7f1',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   menuItem: {
-    padding: 16,
+    padding: 18,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#e8e0d5', // Subtelna linia oddzielająca
   },
   menuItemText: {
     fontSize: 16,
-    color: '#333',
+    color: '#2c3e50',
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
 });
 

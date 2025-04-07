@@ -16,11 +16,11 @@ import { bookApi } from '../services/apiServices.ts';
 import { useNavigation } from '@react-navigation/native';
 
 const categoryMap = {
-  1: 'Science Fiction',
-  2: 'Fantasy',
-  3: 'History',
-  4: 'Biography',
-  5: 'Literature',
+  1: 'Fantastyka naukowa',
+  2: 'Fantastyka',
+  3: 'Historia',
+  4: 'Biografia',
+  5: 'Literatura',
 };
 
 const AddBookScreen = () => {
@@ -144,34 +144,41 @@ const AddBookScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1e88e5',
+    backgroundColor: '#2c3e50',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 16,
+    backgroundColor: '#f9f7f1',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1e88e5',
-    paddingVertical: 16,
+    backgroundColor: '#2c3e50',
+    paddingTop: Platform.OS === 'ios' ? 0 : 16,
+    paddingBottom: 16,
     paddingHorizontal: 16,
+    elevation: 4,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
     marginLeft: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   input: {
-    backgroundColor: '#fff',
-    padding: 12,
-    marginBottom: 12,
-    borderRadius: 8,
+    height: 50,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#d1c7b7',
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   picker: {
     backgroundColor: '#fff',
@@ -189,21 +196,25 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: '#1e88e5',
-    padding: 14,
+    paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
+    marginRight: 8,
+    elevation: 2,
   },
   submitButtonText: {
-    fontSize: 16,
+    color: '#f9f7f1',
     fontWeight: 'bold',
-    color: '#fff',
+    fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   backButton: {
-    padding: 8,
+    padding: 10,
+    borderRadius: 20,
   },
   backButtonText: {
-    fontSize: 24,
-    color: '#fff',
+    fontSize: 28,
+    color: '#f9f7f1',
     fontWeight: 'bold',
   },
 });
