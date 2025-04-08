@@ -10,6 +10,10 @@ import {
   Platform,
   StatusBar,
   ActivityIndicator,
+  ScrollView,
+  KeyboardAvoidingView,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -201,7 +205,15 @@ const EditBook = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+            >
         <View style={styles.header}>
           <TouchableOpacity onPress={goBack} style={styles.backButton}>
             <Text style={styles.backButtonText}>←</Text>
@@ -286,7 +298,9 @@ const EditBook = () => {
             <Text style={styles.buttonText}>Usuń książkę</Text>
           </TouchableOpacity>
         </View>
-      </View>
+        </ScrollView>
+  </TouchableWithoutFeedback>
+</KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -296,6 +310,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#2c3e50',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 100, // żeby nie było za ciasno na dole
   },
   container: {
     flex: 1,

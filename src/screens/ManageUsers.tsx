@@ -61,9 +61,9 @@ const ManageUsersScreen = () => {
         <Text style={styles.email}>{item.email}</Text>
       </View>
       <Text style={styles.fullName}>{`${item.first_name} ${item.last_name}`}</Text>
-      <Text style={styles.phone}>{item.phone || 'No phone available'}</Text>
+      <Text style={styles.phone}>{item.phone || 'Brak numeru telefonu'}</Text>
       <Text style={[styles.status, item.is_active ? styles.active : styles.inactive]}>
-        {item.is_active ? 'Active' : 'Inactive'}
+        {item.is_active ? 'Aktywny' : 'Nieaktywny'}
       </Text>
     </TouchableOpacity>
   );

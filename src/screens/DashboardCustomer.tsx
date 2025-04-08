@@ -139,7 +139,7 @@ const DashboardClientScreen = () => {
           <Text style={styles.menuItemText}>Strona główna</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('ListBooks')}>
-          <Text style={styles.menuItemText}>Ksiżąki</Text>
+          <Text style={styles.menuItemText}>Książki</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('Logout')}>
           <Text style={styles.menuItemText}>Wyloguj się</Text>
@@ -148,7 +148,7 @@ const DashboardClientScreen = () => {
 
       {/* Main Content */}
       <ScrollView style={styles.container}>
-        <Text style={styles.title}>Welcome, {data.username}!</Text>
+        <Text style={styles.title}>Witaj, {data.username}!</Text>
         
         <View style={styles.badgeContainer}>
           <Text style={styles.sectionTitle}>🏆 Osiągnięcia:</Text>
@@ -172,7 +172,7 @@ const DashboardClientScreen = () => {
               <View style={styles.bookHeader}>
                 <Text style={styles.bookTitle}>{item.book_title}</Text>
               </View>
-              <Text style={styles.bookAuthor}>by {item.book_author}</Text>
+              <Text style={styles.bookAuthor}>{item.book_author}</Text>
               <View style={[
                 styles.availabilityBadge, 
                 {backgroundColor: item.is_extended ? '#7f8c8d' : '#2c3e50'}
@@ -182,7 +182,7 @@ const DashboardClientScreen = () => {
                 </Text>
               </View>
               <Text style={styles.bookDates}>
-                Wypożyczone: {formatDate(item.rental_date)} | Do: {formatDate(item.due_date)}
+                Wypożyczone od: {formatDate(item.rental_date)} | Do: {formatDate(item.due_date)}
               </Text>
             </TouchableOpacity>
           ))
@@ -195,7 +195,7 @@ const DashboardClientScreen = () => {
           data.rented_books_old.map((item, index) => (
             <View key={item.id ? item.id.toString() : `history-${index}`} style={[styles.bookItem, styles.historyItem]}>
               <Text style={styles.bookTitle}>{item.book_title}</Text>
-              <Text style={styles.bookAuthor}>by {item.book_author}</Text>
+              <Text style={styles.bookAuthor}>{item.book_author}</Text>
               <Text style={styles.historyDate}>Zwrócone: {formatDate(item.return_date)}</Text>
             </View>
           ))
@@ -211,7 +211,7 @@ const DashboardClientScreen = () => {
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{(data.average_user_rents || 0).toFixed(1)}</Text>
-            <Text style={styles.statLabel}>Śr. użytkonik czyta</Text>
+            <Text style={styles.statLabel}>Śr. wypożyczania</Text>
           </View>
         </View>
 
