@@ -135,13 +135,15 @@ const AddBookScreen = () => {
             handleChange('category', value);
           }}
           style={styles.picker}
+          itemStyle={styles.pickerItem}
         >
-          <Picker.Item label="Wybierz kategorię" value="" />
+          <Picker.Item label="Wybierz kategorię" value="" color="#888" />
           {categories.map((category) => (
             <Picker.Item 
               key={category.id.toString()} 
               label={category.name} 
               value={category.id.toString()} 
+              color="#000" // tutaj kolor tekstu opcji
             />
           ))}
         </Picker>
@@ -222,6 +224,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 8,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#d1c7b7',
+    height: Platform.OS === 'ios' ? 200 : 50,
+    color: '#000', // tylko Android – na iOS działa `itemStyle`
+  },
+  pickerItem: {
+    color: '#000', // kolor tekstu na iOS
+    // fontSize: 16,
   },
   dateInput: {
     backgroundColor: '#fff',
