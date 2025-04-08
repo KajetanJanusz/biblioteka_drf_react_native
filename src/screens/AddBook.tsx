@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,19 +10,12 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { bookApi } from '../services/apiServices.ts';
 import { useNavigation } from '@react-navigation/native';
-
-const categoryMap = {
-  1: 'Fantastyka naukowa',
-  2: 'Fantastyka',
-  3: 'Historia',
-  4: 'Biografia',
-  5: 'Literatura',
-};
 
 const AddBookScreen = () => {
   const [form, setForm] = useState({
@@ -34,9 +28,32 @@ const AddBookScreen = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
   const goBack = () => navigation.goBack();
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await bookApi.getCategories();
+      console.log("Categories response:", response.data);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      Alert.alert(
+        'Błąd',
+        'Nie udało się pobrać kategorii. Spróbuj ponownie później.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (name, value) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -59,6 +76,7 @@ const AddBookScreen = () => {
         total_copies: parseInt(form.total_copies, 10),
       };
 
+      console.log("Submitting book data:", bookData);
       await bookApi.addBook(bookData);
       Alert.alert('Sukces', 'Książka została dodana pomyślnie!');
       navigation.navigate('ManageBooks');
@@ -70,6 +88,22 @@ const AddBookScreen = () => {
       );
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={goBack} style={styles.backButton}>
+              <Text style={styles.backButtonText}>←</Text>
+            </TouchableOpacity>
+            <Text style={styles.title}>Dodaj książkę</Text>
+          </View>
+          <ActivityIndicator size="large" color="#0066CC" style={styles.loader} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -103,8 +137,12 @@ const AddBookScreen = () => {
           style={styles.picker}
         >
           <Picker.Item label="Wybierz kategorię" value="" />
-          {Object.entries(categoryMap).map(([key, label]) => (
-            <Picker.Item key={key} label={label} value={key} />
+          {categories.map((category) => (
+            <Picker.Item 
+              key={category.id.toString()} 
+              label={category.name} 
+              value={category.id.toString()} 
+            />
           ))}
         </Picker>
         <TouchableOpacity style={styles.dateInput} onPress={() => setDatePickerVisibility(true)}>

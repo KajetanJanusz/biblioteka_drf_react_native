@@ -16,14 +16,6 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { bookApi } from '../services/apiServices.ts';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-const categoryMap = {
-  1: 'Fantastyka naukowa',
-  2: 'Fantastyka',
-  3: 'Historia',
-  4: 'Biografia',
-  5: 'Literatura',
-};
-
 const EditBook = () => {
   const [form, setForm] = useState({
     title: '',
@@ -37,45 +29,93 @@ const EditBook = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
 
   const navigation = useNavigation();
   const route = useRoute();
   const bookId = route.params?.id;
 
   useEffect(() => {
-    fetchBookDetails();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await fetchCategories();
+        await fetchBookDetails();
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [bookId]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await bookApi.getCategories();
+      console.log("Categories response:", response.data);
+      setCategories(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      Alert.alert(
+        'Błąd',
+        'Nie udało się pobrać kategorii. Spróbuj ponownie później.'
+      );
+      throw error;
+    }
+  };
 
   const fetchBookDetails = async () => {
     try {
-      setLoading(true);
       const response = await bookApi.getBookDetails(bookId);
+      console.log("Book details response:", response.data);
+      
       const bookData = response.data.book;
       
-      // Find category key by value
-      const categoryKey = Object.keys(categoryMap).find(
-        key => categoryMap[key] === bookData.category
-      ) || '';
+      // Handle the category based on actual response structure
+      // This is the critical part that needs fixing
+      let categoryId = '';
+      
+      // Check different possible structures for the category in the response
+      if (bookData.category && typeof bookData.category === 'object' && bookData.category.id) {
+        // If category is an object with an id field
+        categoryId = bookData.category.id.toString();
+      } else if (bookData.category && typeof bookData.category === 'number') {
+        // If category is just a number
+        categoryId = bookData.category.toString();
+      } else if (typeof bookData.category === 'string' && !isNaN(parseInt(bookData.category))) {
+        // If category is a string that can be parsed as a number
+        categoryId = bookData.category;
+      } else {
+        // If category is a string name, try to find matching id
+        const matchingCategory = categories.find(cat => cat.name === bookData.category);
+        if (matchingCategory) {
+          categoryId = matchingCategory.id.toString();
+        }
+      }
       
       setForm({
-        title: bookData.title,
-        author: bookData.author,
-        category: categoryKey,
+        title: bookData.title || '',
+        author: bookData.author || '',
+        category: categoryId,
         description: bookData.description || '',
-        published_date: bookData.published_date,
-        isbn: bookData.isbn,
-        total_copies: String(bookData.total_copies),
+        published_date: bookData.published_date || '',
+        isbn: bookData.isbn || '',
+        total_copies: bookData.total_copies ? String(bookData.total_copies) : '',
       });
       
-      setSelectedCategory(categoryKey);
+      setSelectedCategory(categoryId);
     } catch (error) {
+      console.error('Error fetching book details:', error);
+      console.error('Error response:', error.response?.data);
       Alert.alert(
         'Błąd',
         error.response?.data?.detail || 'Nie udało się pobrać danych książki'
       );
       navigation.goBack();
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
@@ -100,11 +140,13 @@ const EditBook = () => {
         total_copies: parseInt(form.total_copies, 10),
       };
 
+      console.log("Submitting book data:", bookData);
       await bookApi.editBook(bookId, bookData);
       Alert.alert('Sukces', 'Książka została zaktualizowana pomyślnie!');
       navigation.navigate('DetailsBookEmployee', { id: bookId});
     } catch (error) {
       console.error('Błąd przy aktualizacji książki:', error);
+      console.error('Error response:', error.response?.data);
       Alert.alert(
         'Błąd',
         error.response?.data?.detail || 'Nie udało się zaktualizować książki'
@@ -189,8 +231,12 @@ const EditBook = () => {
           style={styles.picker}
         >
           <Picker.Item label="Wybierz kategorię" value="" />
-          {Object.entries(categoryMap).map(([key, label]) => (
-            <Picker.Item key={key} label={label} value={key} />
+          {categories.map((category) => (
+            <Picker.Item 
+              key={category.id.toString()} 
+              label={category.name} 
+              value={category.id.toString()} 
+            />
           ))}
         </Picker>
         <TextInput

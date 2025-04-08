@@ -52,6 +52,7 @@ export const userApi = {
 
 export const bookApi = {
   getBooks: () => api.get('books/'),
+  getCategories: () => api.get('categories/'),
   getBookDetails: (bookId: number) => 
     api.get(`books/details/${bookId}`),
   addBook: (bookData: BookData) => 
