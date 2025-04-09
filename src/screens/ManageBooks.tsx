@@ -11,9 +11,11 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  ScrollView,
 } from 'react-native';
 import { bookApi } from '../services/apiServices.ts';
 import { useNavigation } from '@react-navigation/native';
+import { RefreshControl } from 'react-native';
 
 const BookListScreen = () => {
   const [books, setBooks] = useState([]);
@@ -22,6 +24,7 @@ const BookListScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigation = useNavigation();
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchBooks();
@@ -45,6 +48,13 @@ const BookListScreen = () => {
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchBooks();
+    setRefreshing(false);
+  };
+  
 
   const navigateTo = (screen) => {
     toggleMenu();
@@ -77,7 +87,8 @@ const BookListScreen = () => {
     
     return matchesSearch && matchesCategory;
   });
-const renderBookItem = ({ item }) => {
+
+  const renderBookItem = ({ item }) => {
     const isAvailable = item.available_copies > 0;
   
     return (
@@ -113,6 +124,53 @@ const renderBookItem = ({ item }) => {
           </Text>
         </View>
       </TouchableOpacity>
+    );
+  };
+
+  // Render category items horizontally
+  const renderCategoryItems = () => {
+    const categoryItems = [
+      { id: null, name: 'Wszystkie' },
+      ...categories.map(id => ({ id, name: getCategoryName(id) }))
+    ];
+
+    return (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoryList}
+      >
+        {categoryItems.map(item => (
+          <TouchableOpacity
+            key={`category-${item.id || 'all'}`}
+            style={[
+              styles.categoryItem,
+              selectedCategory === item.id && styles.selectedCategoryItem
+            ]}
+            onPress={() => setSelectedCategory(item.id)}
+          >
+            <Text style={[
+              styles.categoryItemText,
+              selectedCategory === item.id && styles.selectedCategoryText
+            ]}>
+              {item.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    );
+  };
+
+  // Function to render the book grid
+  const renderBookGrid = () => {
+    return (
+      <View style={styles.bookGrid}>
+        {filteredBooks.map((item, index) => (
+          <View key={`book-${index}`} style={styles.bookItemContainer}>
+            {renderBookItem({ item })}
+          </View>
+        ))}
+      </View>
     );
   };
 
@@ -173,60 +231,36 @@ const renderBookItem = ({ item }) => {
           />
         </View>
 
-        {/* Category Filter Horizontal Scrollable */}
-        <View>
-          <Text style={styles.sectionTitle}>Kategorie:</Text>
-          <FlatList
-            horizontal
-            data={[{ id: null, name: 'Wszystkie' }, ...categories.map(id => ({ id, name: getCategoryName(id) }))]
-            }
-            keyExtractor={(item) => `category-${item.id || 'all'}`}
-            renderItem={({ item }) => (
-              <TouchableOpacity 
-                style={[
-                  styles.categoryItem, 
-                  selectedCategory === item.id && styles.selectedCategoryItem
-                ]}
-                onPress={() => setSelectedCategory(item.id)}
-              >
-                <Text style={[
-                  styles.categoryItemText,
-                  selectedCategory === item.id && styles.selectedCategoryText
-                ]}>
-                  {item.name}
-                </Text>
-              </TouchableOpacity>
-            )}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryList}
-          />
-        </View>
-
-        {/* Book List */}
+        {/* Main Content - Using ScrollView to make everything scroll together */}
         {loading ? (
           <ActivityIndicator size="large" color="#0066CC" style={styles.loader} />
         ) : (
-          <>
-          <Text style={styles.resultsText}>
-          Znaleziono {filteredBooks.length} {''}
-            {filteredBooks.length === 1
-              ? 'książkę'
-              : (filteredBooks.length >= 2 && filteredBooks.length <= 4)
-              ? 'książki'
-              : 'książek'}
-          </Text>
-            <FlatList
-              data={filteredBooks}
-              renderItem={renderBookItem}
-              keyExtractor={(item, index) => `book-${index}`}
-              contentContainerStyle={styles.bookList}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <Text style={styles.emptyList}>Brak wyników dla podanych kryteriów</Text>
-              }
-              numColumns={2}
-            />
-          </>
+          <ScrollView style={styles.scrollContainer}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          >
+            {/* Category Filter section */}
+            <Text style={styles.sectionTitle}>Kategorie:</Text>
+            {renderCategoryItems()}
+
+            {/* Results counter */}
+            <Text style={styles.resultsText}>
+              Znaleziono {filteredBooks.length} {''}
+              {filteredBooks.length === 1
+                ? 'książkę'
+                : (filteredBooks.length >= 2 && filteredBooks.length <= 4)
+                ? 'książki'
+                : 'książek'}
+            </Text>
+
+            {/* Books display */}
+            {filteredBooks.length > 0 ? (
+              renderBookGrid()
+            ) : (
+              <Text style={styles.emptyList}>Brak wyników dla podanych kryteriów</Text>
+            )}
+          </ScrollView>
         )}
       </View>
     </SafeAreaView>
@@ -236,17 +270,20 @@ const renderBookItem = ({ item }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#2c3e50', // Ciemniejszy niebieski - bardziej elegancki
+    backgroundColor: '#2c3e50',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f9f7f1', // Kolor przypominający papier - nawiązanie do książek
+    backgroundColor: '#f9f7f1',
+  },
+  scrollContainer: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2c3e50', // Spójny z safeArea
+    backgroundColor: '#2c3e50',
     paddingTop: Platform.OS === 'ios' ? 0 : 16,
     paddingBottom: 16,
     paddingHorizontal: 16,
@@ -255,9 +292,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#f9f7f1', // Kolor papieru dla kontrastu
+    color: '#f9f7f1',
     marginLeft: 16,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Czcionka kojarząca się z książkami
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   menuButton: {
     padding: 8,
@@ -285,7 +322,7 @@ const styles = StyleSheet.create({
   },
   menuOverlayBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)', // Ciemniejsze tło dla lepszego kontrastu
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
   sideMenu: {
     width: '70%',
@@ -313,7 +350,7 @@ const styles = StyleSheet.create({
   menuItem: {
     padding: 18,
     borderBottomWidth: 1,
-    borderBottomColor: '#e8e0d5', // Subtelna linia oddzielająca
+    borderBottomColor: '#e8e0d5',
   },
   menuItemText: {
     fontSize: 16,
@@ -334,7 +371,7 @@ const styles = StyleSheet.create({
   searchInput: {
     height: 44,
     borderWidth: 1,
-    borderColor: '#d1c7b7', // Kolor papieru starych książek
+    borderColor: '#d1c7b7',
     borderRadius: 22,
     paddingHorizontal: 16,
     backgroundColor: '#fff',
@@ -382,16 +419,20 @@ const styles = StyleSheet.create({
   resultsText: {
     margin: 16,
     fontSize: 15,
-    color: '#7d6e56', // Ciemniejszy odcień brązu kojarzący się z książkami
+    color: '#7d6e56',
     fontStyle: 'italic',
   },
-  bookList: {
+  bookGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: 8,
     paddingBottom: 16,
   },
+  bookItemContainer: {
+    width: '50%',
+  },
   bookItem: {
     backgroundColor: '#fff',
-    flex: 1,
     margin: 8,
     padding: 16,
     borderRadius: 8,
@@ -402,17 +443,11 @@ const styles = StyleSheet.create({
     elevation: 4,
     borderLeftWidth: 4,
     borderLeftColor: '#2c3e50',
-    maxWidth: '46%', // Nieco węższe dla lepszego marginesu
+    height: 160, // Fixed height for consistency
   },
   unavailableBook: {
     opacity: 0.7,
-    borderLeftColor: '#922b21', // Ciemniejszy czerwony - bardziej elegancki
-  },
-  bookHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    borderLeftColor: '#922b21',
   },
   bookTitle: {
     fontSize: 16,
@@ -441,14 +476,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  bookAuthor: {
-    fontSize: 14,
-    color: '#7d6e56',
-    marginBottom: 10,
-    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
-  },
   categoryBadge: {
-    backgroundColor: '#eee8dc', // Jasny papierowy kolor
+    backgroundColor: '#eee8dc',
     alignSelf: 'center',
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -462,12 +491,6 @@ const styles = StyleSheet.create({
     color: '#7d6e56',
     fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
     fontWeight: '500',
-  },
-  bookDescription: {
-    fontSize: 14,
-    color: '#7d6e56',
-    lineHeight: 20,
-    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   loader: {
     flex: 1,
@@ -483,22 +506,22 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   addButton: {
-    backgroundColor: '#2c3e50', // Ciemniejszy niebieski spójny z safeArea i header
-    paddingVertical: 10, // Większy padding dla wygodniejszego kliknięcia
+    backgroundColor: '#2c3e50',
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 20, // Zaokrąglone rogi spójne z categoryItem
-    shadowColor: '#000', // Delikatny cień
+    borderRadius: 20,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 2, // Lekki efekt podniesienia
+    elevation: 2,
   },
   addButtonText: {
-    fontSize: 16, // Większa czcionka dla lepszej czytelności
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#f9f7f1', // Kolor przypominający papier, kontrastujący z ciemnym tłem
+    color: '#f9f7f1',
     textAlign: 'center',
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Spójna czcionka
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
 });
 

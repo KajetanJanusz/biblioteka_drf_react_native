@@ -13,12 +13,14 @@ import {
 } from 'react-native';
 import { userApi } from '../services/apiServices.ts';
 import { useNavigation } from '@react-navigation/native';
+import { RefreshControl } from 'react-native';
 
 const ManageUsersScreen = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigation = useNavigation();
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -42,6 +44,12 @@ const ManageUsersScreen = () => {
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchBooks();
+    setRefreshing(false);
   };
 
   const navigateTo = (screen) => {
@@ -123,6 +131,8 @@ const ManageUsersScreen = () => {
             renderItem={renderUserItem}
             keyExtractor={(item) => `user-${item.id}`}
             contentContainerStyle={styles.userList}
+            refreshing={loading}
+            onRefresh={fetchUsers}
           />
         )}
       </View>

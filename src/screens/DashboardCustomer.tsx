@@ -11,6 +11,7 @@ import {
   Dimensions,
   Platform,
   StatusBar,
+  RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { dashboardApi } from '../services/apiServices.ts';
@@ -21,6 +22,7 @@ const MENU_WIDTH = Dimensions.get('window').width * 0.7;
 const DashboardClientScreen = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
@@ -47,28 +49,34 @@ const DashboardClientScreen = () => {
     outputRange: [0, 0.6],
   });
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const token = await AsyncStorage.getItem('accessToken');
-        if (!token) {
-          Alert.alert('Error', 'No access token found');
-          navigation.navigate('Login');
-          return;
-        }
-
-        const response = await dashboardApi.getCustomerDashboard();
-        setData(response.data);
-      } catch (error) {
-        navigation.navigate('DashboardEmployee');
+  const fetchDashboardData = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        Alert.alert('Error', 'No access token found');
+        navigation.navigate('Login');
         return;
-      } finally {
-        setLoading(false);
       }
-    };
 
+      const response = await dashboardApi.getCustomerDashboard();
+      setData(response.data);
+    } catch (error) {
+      navigation.navigate('DashboardEmployee');
+      return;
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDashboardData();
   }, [navigation]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchDashboardData();
+  };
 
   const navigateTo = (screen) => {
     toggleMenu();
@@ -146,8 +154,20 @@ const DashboardClientScreen = () => {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Main Content */}
-      <ScrollView style={styles.container}>
+      {/* Main Content with Pull-to-Refresh */}
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#2c3e50']}
+            tintColor="#2c3e50"
+            title="Odświeżanie..."
+            titleColor="#7d6e56"
+          />
+        }
+      >
         <Text style={styles.title}>Witaj, {data.username}!</Text>
         
         <View style={styles.badgeContainer}>

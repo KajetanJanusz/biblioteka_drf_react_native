@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Animated,
   Dimensions,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { dashboardApi } from '../services/apiServices.ts';
@@ -20,6 +21,7 @@ const MENU_WIDTH = Dimensions.get('window').width * 0.7;
 const DashboardEmployee = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
@@ -46,27 +48,35 @@ const DashboardEmployee = () => {
     outputRange: [0, 0.5],
   });
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const token = await AsyncStorage.getItem('accessToken');
-        if (!token) {
-          Alert.alert('Error', 'No access token found');
-          navigation.navigate('Login');
-          return;
-        }
-
-        const response = await dashboardApi.getEmployeeDashboard();
-        setData(response.data);
-      } catch (error) {
-        Alert.alert('Error', 'Failed to fetch dashboard data');
-      } finally {
-        setLoading(false);
+  const fetchDashboardData = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        Alert.alert('Error', 'No access token found');
+        navigation.navigate('Login');
+        return;
       }
-    };
 
+      const response = await dashboardApi.getEmployeeDashboard();
+      setData(response.data);
+      return true;
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch dashboard data');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDashboardData();
   }, [navigation]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    const success = await fetchDashboardData();
+    setRefreshing(false);
+  }, []);
 
   const navigateTo = (screen) => {
     toggleMenu();
@@ -129,7 +139,19 @@ const DashboardEmployee = () => {
       </Animated.View>
 
       {/* Main Content */}
-      <ScrollView style={styles.container}>
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#2c3e50']}
+            tintColor={'#2c3e50'}
+            title={'Odświeżanie...'}
+            titleColor={'#7d6e56'}
+          />
+        }
+      >
         <Text style={styles.title}>Witaj, Bibliotekarzu!</Text>
         
         <Text style={styles.sectionTitle}>📚 Aktualnie wypożyczone książki:</Text>
